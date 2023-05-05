@@ -1,6 +1,12 @@
-export fsUtils from './fsUtils.js'
-export funcs from './funcs.js'
-export storage from './storage.js'
+import fsUtils from './fsUtils.js'
+import funcs from './funcs.js'
+import storage from './storage.js'
+
+export {
+  fsUtils,
+  funcs,
+  storage
+}
 
 export default {
   fsUtils,
