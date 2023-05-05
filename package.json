@@ -2,6 +2,7 @@
   "name": "@stardust-js/node",
   "version": "1.0.1",
   "description": "Everything I want to publish here",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "push": "git add . && git commit -m \"add\" && git push origin master",
