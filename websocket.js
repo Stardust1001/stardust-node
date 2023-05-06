@@ -67,6 +67,8 @@ export const gzipClient = async client => {
       emit.apply(client, [command, slice])
     })
   }
+
+  return client
 }
 
 export default {
