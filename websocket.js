@@ -45,7 +45,7 @@ const merge = data => {
   }
 }
 
-export const gzipClient = async client => {
+export const gzipClient = client => {
   const on = client.on
   client.on = (command, func) => {
     on.apply(client, [command, async data => {
