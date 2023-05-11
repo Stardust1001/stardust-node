@@ -21,8 +21,8 @@ class Storage {
     return this.cache
   }
 
-  async save (cache = {}) {
-    this.cache = cache
+  async save (cache) {
+    this.cache = cache || this.cache
     await write(this.filepath, JSON.stringify(cache, null, this.jsonSpace))
   }
 
