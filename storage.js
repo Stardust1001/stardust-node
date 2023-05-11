@@ -18,10 +18,15 @@ class Storage {
   async load () {
     const text = await read(this.filepath)
     this.cache = JSON.parse(text || '{}')
+    this.loaded = true
     return this.cache
   }
 
   async save (cache) {
+    if (cache === undefined && !this.loaded) {
+      return
+    }
+    await this.load()
     cache = cache || this.cache
     await write(this.filepath, JSON.stringify(cache, null, this.jsonSpace))
   }
