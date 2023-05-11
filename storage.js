@@ -3,8 +3,10 @@ import { read, write } from './fsUtils.js'
 class Storage {
   constructor (config = {}) {
     this.config = config
-    const { filepath, autoLoad = false, jsonSpace = 2 } = config
+    const { filepath, autoLoad = false, autoSave = true, jsonSpace = 2 } = config
     this.filepath = filepath
+    this.autoLoad = autoLoad
+    this.autoSave = autoSave
     this.jsonSpace = jsonSpace
 
     this.loaded = false
@@ -32,13 +34,13 @@ class Storage {
   setItem (key, value) {
     if (!this.loaded) throw new Error('please load first')
     this.cache[key] = value
-    this.save(this.cache)
+    this.autoSave && this.save(this.cache)
   }
 
   clear () {
     if (!this.loaded) throw new Error('please load first')
     this.cache = {}
-    this.save(this.cache)
+    this.autoSave && this.save(this.cache)
   }
 }
 
