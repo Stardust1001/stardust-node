@@ -2,6 +2,7 @@ import middlewares from './middlewares/index.js'
 import routes from './routes/index.js'
 import services from './services/index.js'
 import acl from './acl.js'
+import bcrypt from './bcrypt.js'
 import hooks from './hooks.js'
 import jwt from './jwt.js'
 import translate from './translate.js'
@@ -12,6 +13,7 @@ export {
   routes,
   services,
   acl,
+  bcrypt,
   hooks,
   jwt,
   translate,
@@ -23,6 +25,7 @@ export default {
   routes,
   services,  
   acl,
+  bcrypt,
   hooks,
   jwt,
   translate,
