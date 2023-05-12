@@ -1,6 +1,6 @@
 {
   "name": "@stardust-js/node",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Everything I want to publish here",
   "type": "module",
   "main": "index.js",
@@ -26,5 +26,12 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "chalk": "^5.2.0",
+    "fs-extra": "^11.1.1",
+    "glob": "^10.2.3",
+    "jsonwebtoken": "^9.0.0",
+    "sequelize": "^6.31.1"
   }
 }
