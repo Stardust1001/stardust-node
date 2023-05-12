@@ -26,7 +26,7 @@ class Storage {
     if (cache === undefined && !this.loaded) {
       return
     }
-    await this.laod()
+    await this.load()
     cache = cache || this.cache
     await write(this.filepath, JSON.stringify(cache, null, this.jsonSpace))
   }
