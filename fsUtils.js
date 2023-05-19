@@ -6,16 +6,9 @@ export const exists = filepath => {
   return new Promise(resolve => fs.exists(filepath, resolve))
 }
 
-export const mkdir = async dirpath => {
+export const mkdir = async (dirpath, options) => {
   if (!await exists(dirpath)) {
-    const parts = dirpath.split(path.sep)
-    for (let i = 1; i <= parts.length; i++) {
-      const branch = parts.slice(0, i).join(path.sep)
-      if (!branch) continue
-      if (!await exists(branch)) {
-        await fs.promises.mkdir(branch)
-      }
-    }
+    await fs.promises.mkdir(dirpath, { recursive: true, ...options })
   }
 }
 
