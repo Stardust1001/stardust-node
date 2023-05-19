@@ -18,6 +18,7 @@ export const makeModels = async (db) => {
   initers.forEach(initer => {
     const { database, initFunc } = initer
     const source = db.sources[database]
+    if (!source) return
     const databaseModels = initFunc(source.sequelize)
     Object.values(databaseModels).forEach(model => {
       const name = model.tableName
