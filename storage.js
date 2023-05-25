@@ -23,12 +23,14 @@ class Storage {
   }
 
   async save (cache) {
-    if (cache === undefined && !this.loaded) {
-      return
+    if (cache == null) {
+      if (!this.loaded) {
+        return
+      }
+      cache = this.cache
     }
-    await this.load()
-    cache = cache || this.cache
-    await write(this.filepath, JSON.stringify(cache, null, this.jsonSpace))
+    this.cache = cache
+    await write(this.filepath, JSON.stringify(this.cache, null, this.jsonSpace))
   }
 
   getItem (key) {
