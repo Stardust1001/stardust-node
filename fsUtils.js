@@ -20,6 +20,9 @@ export const listDir = async dirpath => {
 }
 
 export const listAll = async (dirpath) => {
+  if (!await exists(dirpath)) {
+    return []
+  }
   const list = async (all, dirpath) => {
     if (await isDir(dirpath)) {
       const subs = await listDir(dirpath)
