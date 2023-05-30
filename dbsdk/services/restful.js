@@ -16,7 +16,7 @@ export class RestfulService {
 
   async search (model, form = {}, options) {
     const table = this.db.models[model]
-    const { page = 1, limit = 10, attributes, include, ...others } = form
+    let { page = 1, limit = 10, attributes, include, ...others } = form
     if (page < 1) page = 1
     if (page > Number.MAX_SAFE_INTEGER) page = 1
     if (limit > this.config.pagerMaxLimit) {
