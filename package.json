@@ -1,6 +1,6 @@
 {
   "name": "@stardust-js/node",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "description": "Everything I want to publish here",
   "type": "module",
   "main": "index.js",
@@ -31,6 +31,7 @@
     "@stardust-js/js": "latest",
     "bcryptjs": "^2.4.3",
     "fs-extra": "^11.1.1",
-    "glob": "^10.2.6"
+    "glob": "^10.2.6",
+    "jsonwebtoken": "^9.0.0"
   }
 }
