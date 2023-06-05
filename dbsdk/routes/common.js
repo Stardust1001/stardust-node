@@ -28,7 +28,7 @@ export class CommonRoute {
       if (files.some(file => !checkValid(file))) {
         err = '不支持上传的文件类型'
       } else {
-        names = files.map(this.common.saveFile)
+        names = await Promise.all(files.map(f => this.common.saveFile(f)))
       }
     } else {
       if (!checkValid(files)) {

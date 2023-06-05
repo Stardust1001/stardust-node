@@ -25,9 +25,9 @@ export class CommonService {
     if (!this.uploadDir) {
       await this.init()
     }
-    const filename = crypto.randomUUID() + '.' + file.name.split('.').pop()
+    const filename = crypto.randomUUID() + '.' + file.originalFilename.split('.').pop()
     const desti = fs.createWriteStream(path.join(this.uploadDir, filename))
-    fs.createReadStream(file.path).pipe(desti)
+    fs.createReadStream(file.filepath).pipe(desti)
     return 'upload/' + filename
   }
 
