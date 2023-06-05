@@ -22,7 +22,7 @@ export class CommonRoute {
     let names = []
     let err = null
 
-    const checkValid = file => suffixes.some(suffix => file.name.toLowerCase().endsWith('.' + suffix))
+    const checkValid = file => suffixes.some(suffix => file.originalFilename.toLowerCase().endsWith('.' + suffix))
 
     if (Array.isArray(files)) {
       if (files.some(file => !checkValid(file))) {
