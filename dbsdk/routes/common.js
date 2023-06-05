@@ -34,7 +34,7 @@ export class CommonRoute {
       if (!checkValid(files)) {
         err = '不支持上传的文件类型'
       } else {
-        names = this.common.saveFile(files)
+        names = await this.common.saveFile(files)
       }
     }
     ctx.body = {
