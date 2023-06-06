@@ -20,8 +20,14 @@ export const pipeRes = (res, ctx) => {
   })
 }
 
+export const importFile = filepath => {
+  filepath = (filepath[0] === '/' ? 'file://' : 'file:///') + filepath
+  return import(filepath)
+}
+
 export default {
   isWindows,
   openUrl,
-  pipeRes
+  pipeRes,
+  importFile
 }

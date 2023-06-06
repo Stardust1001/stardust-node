@@ -2,14 +2,15 @@ import path from 'path'
 import chalk from 'chalk'
 import { glob } from 'glob'
 import Sequelize from 'sequelize'
+import { importFile } from '../funcs.js'
 
 export const makeModels = async (db) => {
   const files = await glob('./models/*/init-models.js')
   const initers = await Promise.all(files.map(async file => {
-    const name = path.join(process.cwd(), file)
-    const res = await import(name)
+    const filepath = path.join(process.cwd(), file)
+    const res = await importFile(filepath)
     return {
-      database: name.split('/').slice(-2)[0],
+      database: filepath.split('/').slice(-2)[0],
       initFunc: res.default
     }
   }))
