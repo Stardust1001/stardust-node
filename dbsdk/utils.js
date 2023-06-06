@@ -10,7 +10,7 @@ export const makeModels = async (db) => {
     const filepath = path.join(process.cwd(), file)
     const res = await importFile(filepath)
     return {
-      database: filepath.split('/').slice(-2)[0],
+      database: filepath.split(path.sep).slice(-2)[0],
       initFunc: res.default
     }
   }))
