@@ -8,7 +8,9 @@ export const exists = filepath => {
 
 export const mkdir = async (dirpath, options) => {
   if (!await exists(dirpath)) {
-    await fs.promises.mkdir(dirpath, { recursive: true, ...options })
+    return new Promise(resolve => {
+      fs.mkdir(dirpath, { recursive: true, ...options }, resolve)
+    })
   }
 }
 
@@ -16,10 +18,12 @@ export const listDir = async dirpath => {
   if (!await exists(dirpath)) {
     return []
   }
-  return fs.promises.readdir(dirpath)
+  return new Promise(resolve => {
+    fs.readdir(dirpath, (err, files) => resolve(err ? [] : files))
+  })
 }
 
-export const listAll = async (dirpath) => {
+export const listAll = async dirpath => {
   if (!await exists(dirpath)) {
     return []
   }
@@ -37,7 +41,9 @@ export const listAll = async (dirpath) => {
 }
 
 export const stat = filepath => {
-  return fs.promises.stat(filepath)
+  return new Promise(resolve => {
+    fs.stat(filepath, (err, data) => resolve(err ? null : data))
+  })
 }
 
 export const isFile = async filepath => {
@@ -49,29 +55,28 @@ export const isDir = async filepath => {
 }
 
 export const write = (filepath, data, encoding = 'utf-8') => {
-  return fs.promises.writeFile(filepath, data, encoding)
+  return new Promise(resolve => fs.writeFile(filepath, data, encoding, resolve))
 }
 
 export const read = async (filepath, encoding = 'utf-8') => {
   if (!await exists(filepath)) return null
-  return fs.promises.readFile(filepath, encoding)
+  return new Promise(resolve => {
+    fs.readFile(filepath, encoding, (err, data) => resolve(err ? null : data))
+  })
 }
 
 export const rename = (source, desti) => {
-  return fs.promises.rename(source, desti)
+  return new Promise((resolve, reject) => fs.rename(source, desti, resolve))
 }
 
 export const copy = (source, desti) => {
-  return fsExtra.copy(source, desti)
+  return new Promise((resolve, reject) => fsExtra.copy(source, desti, resolve))
 }
 
 export const remove = (filepath, options) => {
-  options = {
-    force: true,
-    recursive: true,
-    ...options
-  }
-  return fs.promises.rm(filepath, options)
+  return new Promise(resolve => {
+    fs.rm(filepath, { force: true, recursive: true, ...options }, resolve)
+  })
 }
 
 export default {
