@@ -54,14 +54,18 @@ export const isDir = async filepath => {
   return (await stat(filepath))?.isDirectory()
 }
 
-export const write = (filepath, data, encoding = 'utf-8') => {
-  return new Promise(resolve => fs.writeFile(filepath, data, encoding, resolve))
+export const write = (filepath, data, options = 'utf-8') => {
+  return new Promise(resolve => fs.writeFile(filepath, data, options, resolve))
 }
 
-export const read = async (filepath, encoding = 'utf-8') => {
+export const append = (filepath, data, options = 'utf-8') => {
+  return new Promise(resolve => fs.appendFile(filepath, data, options, resolve))
+}
+
+export const read = async (filepath, options = 'utf-8') => {
   if (!await exists(filepath)) return null
   return new Promise(resolve => {
-    fs.readFile(filepath, encoding, (err, data) => resolve(err ? null : data))
+    fs.readFile(filepath, options, (err, data) => resolve(err ? null : data))
   })
 }
 
@@ -83,6 +87,7 @@ export default {
   exists,
   mkdir,
   write,
+  append,
   read,
   rename,
   copy,
