@@ -899,6 +899,10 @@ export class Executor {
     }
     return funcs.sleep(Number.MAX_SAFE_INTEGER)
   }
+
+  close () {
+    return this.page.close()
+  }
 }
 
 export default Executor
