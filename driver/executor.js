@@ -589,11 +589,10 @@ export class Executor {
     const format = options.format || Loader.getFileType(saveTo)
     await Dumper[format](data, saveTo, options)
     if (options.comment) {
-      const staticDir = this.config.tempDir.split(path.sep).slice(0, -1).join(path.sep)
       this.log({
         type: 'link',
         name,
-        link: this.config.apiUrl + '/' + path.relative(staticDir, saveTo)
+        link: this.config.apiUrl + '/' + path.relative(path.dirname(tempDir), saveTo)
       })
     }
     return saveTo
