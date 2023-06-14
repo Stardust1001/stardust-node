@@ -82,6 +82,7 @@ export class Driver {
     if (options.newBrowser) options.newContext = true
     const [browser, context] = await this.getContext(options)
     const executor = new this.Executor(this, browser, context, options)
+    await this.afterCreateExecutor?.(executor)
     this.executors.push(executor)
 
     this.indicators.num_bots ++

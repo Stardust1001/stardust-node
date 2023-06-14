@@ -111,6 +111,7 @@ export class Executor {
   }
 
   async goto (url, options) {
+    await this.beforeGoto?.(url, options)
     const hasUrl = !!url
     url ||= this.config.homeUrl + '/blank/index.html'
     this.page = this.page || await this.context.newPage()
@@ -119,10 +120,13 @@ export class Executor {
     if (!hasUrl) {
       await this.eval(`$one('#app').remove()`)
     }
+    await this.afterGoto?.(url, options)
   }
 
-  reload (options) {
-    return this.page.reload(options)
+  async reload (options) {
+    await this.beforeReload?.(options)
+    await this.page.reload(options)
+    await this.afterReload?.(options)
   }
 
   wait (name, ...props) {
@@ -900,8 +904,10 @@ export class Executor {
     return funcs.sleep(Number.MAX_SAFE_INTEGER)
   }
 
-  close () {
-    return this.page.close()
+  async close () {
+    await this.beforeClose?.()
+    await this.page.close()
+    await this.afterClose?.()
   }
 }
 
