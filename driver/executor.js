@@ -37,6 +37,12 @@ export class Executor {
       highdict,
       dates,
       fsUtils,
+      ...funcs,
+      ...highdict,
+      ...dates,
+      ...fsUtils,
+      Loader,
+      Dumper
     }
 
     this.isExcuting = false
