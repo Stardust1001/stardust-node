@@ -167,6 +167,46 @@ export class Executor {
     return Promise.all(ps)
   }
 
+  async waitForNext (title = '下一步', options) {
+    options = { ...options }
+    await this.eval(`
+      const button = document.createElement('div')
+      const root = '${options.root || ''}'
+      document.querySelector(root || 'body').appendChild(button)
+      button.style.cssText += \`
+        z-index: 9999;
+        width: 300px;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        background-color: #409eff;
+        color: white;
+        cursor: pointer;
+        margin: 2px;
+      \`
+      if (!root) {
+        button.style.cssText += \`
+          position: fixed;
+          left: 5px;
+          bottom: 5px;
+        \`
+      }
+      button.style.cssText += \`
+        ${options.style}
+      \`
+      button.onmouseover = () => {
+        button.style.opacity = 0.8
+      }
+      button.onmouseout = () => {
+        button.style.opacity = 1
+      }
+      button.textContent = \`${title}\`
+      new Promise(resolve => {
+        button.onclick = () => { button.remove(); resolve() }
+      })
+    `)
+  }
+
   sleep (ms) {
     return funcs.sleep(ms)
   }
@@ -602,7 +642,7 @@ export class Executor {
       this.log({
         type: 'link',
         name,
-        link: this.config.apiUrl + '/' + path.relative(path.dirname(this.config.tempDir), saveTo)
+        link: this.config.apiUrl + '/' + path.relative(this.config.staticDir, saveTo)
       })
     }
     return saveTo
@@ -689,7 +729,7 @@ export class Executor {
           })
         `)
       }
-      await page.evaluate(([message, options]) => {
+      await page.evaluate(([message, options, apiUrl]) => {
         const lang = typeof message === 'object' ? 'json' : 'sh'
         let html
         if (lang === 'json') {
@@ -697,22 +737,23 @@ export class Executor {
             html = `
               <a
                 target="_blank"
-                href="${this.config.apiUrl}/$\{message.link\}"
-                download="${this.config.apiUrl}/$\{message.link\}"
+                href="${message.link}"
+                download="${message.link}"
               >
-                附件：$\{message.name\}
+                附件：${message.name}
               </a>
             `
           } else if (message.type === 'html') {
             html = message.html
           } else {
-            html = window.shikiHighlighter.codeToHtml(JSON.stringify(message), { lang })
+            html = window.shikiHighlighter.codeToHtml(JSON.stringify(message, null, 2), { lang })
           }
         } else {
           html = window.shikiHighlighter.codeToHtml(message, { lang })
         }
         const node = document.createElement('div')
         node.innerHTML = html
+        node.style.overflowX = 'auto'
         const pre = node.querySelector('pre')
         if (pre) {
           pre.style.margin = '1px 2px'
@@ -727,12 +768,15 @@ export class Executor {
         document.body.appendChild(node)
         document.body.scrollBy(0, 1000)
         document.documentElement.scrollBy(0, 2000)
-      }, [message, options])
+      }, [message, options, this.config.apiUrl])
     }
     this.log(message, options)
   }
 
   async load (filepath, options, ...props) {
+    if (typeof filepath === 'function') {
+      filepath = await filepath(this.safeThis)
+    }
     options = { ...options }
     if (!await fsUtils.exists(filepath)) {
       throw '文件不存在'
@@ -843,7 +887,7 @@ export class Executor {
         window.frontReady()
       })
     `, options)
-    result = result.map(ele => path.join('static', new URL(ele).pathname))
+    result = result.map(ele => path.join(this.config.staticDir, new URL(ele).pathname))
     if (props.length) {
       return this.save(result, ...props)
     }
@@ -878,6 +922,13 @@ export class Executor {
           created () {
             this.controller = new Controller({ model: this })
             initForm(this.form, fields)
+            const defaults = {}
+            fields.forEach(f => {
+              if ('defaultValue' in f) {
+                defaults[f.prop] = f.defaultValue
+              }
+            })
+            Object.assign(this.form.form, defaults)
           },
           methods: {
             cancel () {
