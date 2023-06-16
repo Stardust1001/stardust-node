@@ -467,6 +467,9 @@ export class Executor {
       ok = await this.page.evaluate(func)
     }
     if (ok) {
+      if (typeof operations === 'function') {
+        operations = await operations(this.safeThis, ...props)
+      }
       await this.execute(operations, 'if', ...props)
     }
   }
@@ -479,12 +482,18 @@ export class Executor {
       ok = await this.page.evaluate(func)
     }
     if (ok) {
+      if (typeof operations === 'function') {
+        operations = await operations(this.safeThis, ...props)
+      }
       await this.execute(operations, 'elseIf', ...props)
     }
   }
 
   async else (operations, ...props) {
     if (this._isInIf) {
+      if (typeof operations === 'function') {
+        operations = await operations(this.safeThis, ...props)
+      }
       await this.execute(operations, 'else', ...props)
     }
     this._isInIf = false
