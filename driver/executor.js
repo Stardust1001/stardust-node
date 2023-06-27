@@ -111,16 +111,19 @@ export class Executor {
   }
 
   async goto (url, options) {
-    await this.beforeGoto?.(url, options)
     const hasUrl = !!url
     url ||= this.config.homeUrl + '/blank/index.html'
-    this.page = this.page || await this.context.newPage()
+    if (!this.page) {
+      this.page = await this.context.newPage()
+      await this.afterNewPage?.(this.page, url, options)
+    }
     this.topPage = this.topPage || this.page
+    await this.beforeGoto?.(url, options)
     await this.page.goto(url, options)
+    await this.afterGoto?.(url, options)
     if (!hasUrl) {
       await this.eval(`$one('#app').remove()`)
     }
-    await this.afterGoto?.(url, options)
   }
 
   async reload (options) {
