@@ -13,6 +13,7 @@ export const pipeRes = (res, ctx) => {
   const headers = {}
   Array.from(res.headers.entries()).forEach(([k, v]) => headers[k] = v)
   delete headers['content-encoding']
+  delete headers['content-length']
   ctx.res.writeHead(res.status, headers)
   res.body.pipe(ctx.res)
   return new Promise((resolve) => {
