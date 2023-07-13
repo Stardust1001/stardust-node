@@ -1,3 +1,4 @@
+import { checkAcl } from '../middlewares/index.js'
 import { calcModel, makeBatchCtx } from '../utils.js'
 import hooks from '../hooks.js'
 
@@ -88,7 +89,9 @@ export class RestfulRoute {
   }
 
   async batch (ctx) {
-    const routeFuncs = ['get', 'add', 'search', 'update', 'remove', 'func'].map(k => this[k])
+    const funcs = ['get', 'add', 'search', 'update', 'remove', 'func']
+    const routeFuncs = {}
+    funcs.forEach(k => routeFuncs[k] = this[k])
 
     const { transaction = false, operations } = ctx.request.body || {}
     if (!Array.isArray(operations)) {
@@ -118,9 +121,9 @@ export class RestfulRoute {
         const mockCtx = makeBatchCtx(operation, ctx)
         promises.push(new Promise(async (resolve, reject) => {
           let ok = false
-          await acl[0](mockCtx, () => ok = true)
+          await checkAcl(mockCtx, () => ok = true)
           if (ok) {
-            const routeFunc = routeFuncs[operation.type]
+            const routeFunc = routeFuncs[operation.type].bind(this)
             mockCtx.request.meta.options = {
               ...(mockCtx.request.meta.options || {}),
               transaction: t
