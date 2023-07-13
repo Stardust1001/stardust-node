@@ -9,13 +9,13 @@ export class CommonRoute {
 
   routes () {
     const router = this.router
-    router.post('/common/upload_file', this.uploadFile.bind(this))
-    router.get('/common/get_setting', this.getSetting.bind(this))
-    router.post('/common/update_setting', this.updateSetting.bind(this))
+    router.post('/common/upload_files', this.uploadFiles.bind(this))
+    router.get('/common/get_settings', this.getSettings.bind(this))
+    router.post('/common/update_settings', this.updateSettings.bind(this))
     router.post('/common/call_sql', this.callSql.bind(this))
   }
 
-  async uploadFile (ctx, next) {
+  async uploadFiles (ctx, next) {
     const { suffixes } = this.app.config.upload
 
     const files = ctx.request.files.file
@@ -44,13 +44,13 @@ export class CommonRoute {
     }
   }
 
-  async getSetting (ctx, next) {
+  async getSettings (ctx, next) {
     const { name } = ctx.query
     const settings = await this.common.getSettings()
     ctx.body = { data: settings[name] ?? null, err: null }
   }
 
-  async updateSetting (ctx, next) {
+  async updateSettings (ctx, next) {
     const settings = await this.common.getSettings()
     const { name, data } = ctx.request.body
     settings[name] = data
