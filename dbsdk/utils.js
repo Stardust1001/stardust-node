@@ -1,5 +1,4 @@
 import path from 'path'
-import chalk from 'chalk'
 import { glob } from 'glob'
 import Sequelize from 'sequelize'
 import { importFile } from '../funcs.js'
@@ -133,12 +132,12 @@ export const checkModelAcls = (app) => {
   const databases = Object.keys(sources)
   for (let database of databases) {
     if (!modelConfigs[database]) {
-      console.log(chalk.red(`数据库 ${database} 未配置权限，此数据库将默认只读`))
+      console.log(`💢💢💢💢💢 数据库 ${database} 未配置权限，此数据库将默认只读`)
     } else {
       const tables = Object.keys(sources[database].models)
       for (let table of tables) {
         if (!modelConfigs[database][table] || !modelConfigs[database][table].acl) {
-          console.log(chalk.red(`数据表 ${database}.${table} 未配置权限，此数据表将默认只读`))
+          console.log(`💢💢💢💢💢 数据表 ${database}.${table} 未配置权限，此数据表将默认只读`)
         }
       }
     }
