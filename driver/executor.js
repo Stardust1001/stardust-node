@@ -654,7 +654,8 @@ export class Executor {
       this.log({
         type: 'link',
         name,
-        link: this.config.apiUrl + '/' + path.relative(this.config.staticDir, saveTo)
+        link: this.config.apiUrl + '/' + path.relative(this.config.staticDir, saveTo),
+        download: path.basename(saveTo)
       })
     }
     return saveTo
