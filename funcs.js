@@ -1,5 +1,14 @@
 import os from 'os'
+import path from 'path'
 import child_process from 'child_process'
+
+export const curfile = () => {
+  return import.meta.url.slice(isWindows() ? 8 : 7)
+}
+
+export const curdir = () => {
+  return path.dirname(curfile())
+}
 
 export const isWindows = () => {
   return /^win/i.test(os.platform())
@@ -27,6 +36,8 @@ export const importFile = filepath => {
 }
 
 export default {
+  curfile,
+  curdir,
   isWindows,
   openUrl,
   pipeRes,

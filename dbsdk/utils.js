@@ -2,11 +2,12 @@ import path from 'path'
 import { glob } from 'glob'
 import Sequelize from 'sequelize'
 import { importFile } from '../funcs.js'
+import { curdir } from '../funcs.js'
 
 export const makeModels = async (db) => {
   const files = await glob('./models/*/init-models.js')
   const initers = await Promise.all(files.map(async file => {
-    const filepath = path.join(path.dirname(import.meta.url), file)
+    const filepath = path.join(curdir(), file)
     const res = await importFile(filepath)
     return {
       database: filepath.split(path.sep).slice(-2)[0],

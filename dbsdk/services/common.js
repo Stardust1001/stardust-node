@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 import fsUtils from '../../fsUtils.js'
+import { curdir } from '../../funcs.js'
 
 export class CommonService {
   constructor (db, config) {
@@ -13,8 +14,8 @@ export class CommonService {
   }
 
   async init () {
-    this.uploadDir = path.join(path.dirname(import.meta.url), this.config.uploadDir)
-    this.settingsPath = path.join(path.dirname(import.meta.url), this.config.settingsPath)
+    this.uploadDir = path.join(curdir(), this.config.uploadDir)
+    this.settingsPath = path.join(curdir(), this.config.settingsPath)
 
     if (!(await fsUtils.exists(this.uploadDir))) {
       await fsUtils.mkdir(this.uploadDir)
