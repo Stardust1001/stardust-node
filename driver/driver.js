@@ -127,7 +127,7 @@ export class Driver {
     }
     let context = options.headless ? this.headlessContext : this.context
     if (!context || options.newContext) {
-      context = await browser.newContext()
+      context = await browser.newContext(options.contextOptions)
       this.initContext(context, options)
       this.indicators.num_contexts ++
     }
