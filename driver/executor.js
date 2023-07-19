@@ -794,7 +794,7 @@ export class Executor {
     }
     options = { ...options }
     if (!await fsUtils.exists(filepath)) {
-      throw '文件不存在'
+      throw '文件不存在: ' + filepath
     }
     const type = options.type || Loader.getFileType(filepath)
     const content = await Loader[type](filepath, options)
