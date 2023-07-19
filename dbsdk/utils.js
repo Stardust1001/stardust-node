@@ -6,7 +6,7 @@ import { importFile } from '../funcs.js'
 export const makeModels = async (db) => {
   const files = await glob('./models/*/init-models.js')
   const initers = await Promise.all(files.map(async file => {
-    const filepath = path.join(process.cwd(), file)
+    const filepath = path.join(path.dirname(import.meta.url), file)
     const res = await importFile(filepath)
     return {
       database: filepath.split(path.sep).slice(-2)[0],

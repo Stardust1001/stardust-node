@@ -13,8 +13,8 @@ export class CommonService {
   }
 
   async init () {
-    this.uploadDir = path.join(process.cwd(), this.config.uploadDir)
-    this.settingsPath = path.join(process.cwd(), this.config.settingsPath)
+    this.uploadDir = path.join(path.dirname(import.meta.url), this.config.uploadDir)
+    this.settingsPath = path.join(path.dirname(import.meta.url), this.config.settingsPath)
 
     if (!(await fsUtils.exists(this.uploadDir))) {
       await fsUtils.mkdir(this.uploadDir)
