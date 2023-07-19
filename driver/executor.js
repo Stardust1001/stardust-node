@@ -103,6 +103,8 @@ export class Executor {
       } catch (err) {
         console.log('0000000000000000000000000000')
         console.log(err)
+        this.log('0000000000000000000000000000')
+        this.log(err)
         return
       }
     }
