@@ -5,12 +5,12 @@ import { importFile } from '../funcs.js'
 import { curdir } from '../funcs.js'
 
 export const makeModels = async (db) => {
-  const files = await glob('./models/*/init-models.js')
+  const dirname = path.join(curdir(import.meta), '../../../../')
+  const files = await glob(path.join(dirname, './models/*/init-models.js'))
   const initers = await Promise.all(files.map(async file => {
-    const filepath = path.join(curdir(), file)
-    const res = await importFile(filepath)
+    const res = await importFile(file)
     return {
-      database: filepath.split(path.sep).slice(-2)[0],
+      database: file.split(path.sep).slice(-2)[0],
       initFunc: res.default
     }
   }))
