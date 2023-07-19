@@ -101,10 +101,13 @@ export class Executor {
       try {
         await this[ele[0]](...args)
       } catch (err) {
-        console.log('0000000000000000000000000000')
+        console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
         console.log(err)
-        this.log('0000000000000000000000000000')
-        this.log(err)
+        this.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+        this.log(err.toString())
+        if (err?.stack) {
+          this.log(err.stack.toString())
+        }
         return
       }
     }
