@@ -83,16 +83,16 @@ export class Executor {
   async execute (operations, source, ...props) {
     await this.beforeExecute?.(operations, source, ...props)
     const execTypes = ['if', 'elseIf', 'else', 'switch', 'for', 'dynamic', 'withFrame']
-    const shouldLog = [...execTypes, 'exec', 'use', 'func', 'comment'].includes(source)
+    // const shouldLog = [...execTypes, 'exec', 'use', 'func', 'comment'].includes(source)
     for (let ele of operations) {
       if (ele[0] !== 'log') {
-        if (shouldLog) {
-          if (Array.isArray(ele[2])) {
-            console.log(ele.slice(0, 2))
-          } else {
-            console.log(ele)
-          }
-        }
+        // if (shouldLog) {
+        //   if (Array.isArray(ele[2])) {
+        //     this.log(ele.slice(0, 2))
+        //   } else {
+        //     this.log(ele)
+        //   }
+        // }
       }
       const args = [...ele.slice(1)]
       if ([...execTypes, 'func', 'comment'].includes(ele[0])) {
@@ -101,14 +101,7 @@ export class Executor {
       try {
         await this[ele[0]](...args)
       } catch (err) {
-        console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-        console.log(err)
-        this.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-        this.log(err.toString())
-        if (err?.stack) {
-          this.log(err.stack.toString())
-        }
-        return
+        return onError(err, this.log)
       }
     }
     this.cache.save()
@@ -532,7 +525,7 @@ export class Executor {
       operations = await operations(this.safeThis)
     }
     return Promise.all(operations.map(ele => {
-      return this[ele[0]](...ele.slice(1)).catch(onError)
+      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log))
     }))
   }
 
@@ -541,7 +534,7 @@ export class Executor {
       operations = await operations(this.safeThis)
     }
     return Promise.race(operations.map(ele => {
-      return this[ele[0]](...ele.slice(1)).catch(onError)
+      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log))
     }))
   }
 
@@ -550,7 +543,7 @@ export class Executor {
       operations = await operations(this.safeThis)
     }
     return Promise.any(operations.map(ele => {
-      return this[ele[0]](...ele.slice(1)).catch(onError)
+      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log))
     }))
   }
 

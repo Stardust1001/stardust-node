@@ -25,9 +25,15 @@ export const chainLocator = (locator, options) => {
   return locator
 }
 
-export const onError = err => {
-  console.log('0000000000000000000000000000')
-  console.log(err)
+export const onError = (err, log = console.log) => {
+  log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+  if (err?.stack) {
+    log(err.stack.toString())
+  } else if (err?.message) {
+    log(err.message.toString())
+  } else {
+    log(err?.toString())
+  }
 }
 
 export default {
