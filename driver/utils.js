@@ -25,8 +25,8 @@ export const chainLocator = (locator, options) => {
   return locator
 }
 
-export const onError = (err, log = console.log) => {
-  log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+export const onError = (err, log = console.log, label = '') => {
+  log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -- ' + label)
   if (err?.stack) {
     log(err.stack.toString())
   } else if (err?.message) {

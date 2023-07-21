@@ -3,6 +3,7 @@ import { chromium, firefox, webkit } from 'playwright'
 import { funcs, highdict } from '@stardust-js/js'
 import Storage from '../storage.js'
 import Executor from './executor.js'
+import { onError } from './utils.js'
 
 export class Driver {
   constructor (config = {}) {
@@ -31,10 +32,18 @@ export class Driver {
   }
 
   async init () {
-    await this.beforeInit?.()
+    try {
+      await this.beforeInit?.()
+    } catch (err) {
+      onError(err, this.log, 'driver beforeInit')
+    }
     await this.userCache.load()
     this.indicators.num_runs = this.userCache.cache.num_runs || 0
-    await this.afterInit?.()
+    try {
+      await this.afterInit?.()
+    } catch (err) {
+      onError(err, this.log, 'driver afterInit')
+    }
   }
 
   getBot (executor, code, props = {}) {
@@ -70,7 +79,11 @@ export class Driver {
   }
 
   async exec (operations, options) {
-    await this.beforeExec?.(operations, options)
+    try {
+      await this.beforeExec?.(operations, options)
+    } catch (err) {
+      onError(err, this.log, 'beforeExec')
+    }
     if (!operations.length) return
     options = {
       newBrowser: false,
@@ -82,7 +95,11 @@ export class Driver {
     if (options.newBrowser) options.newContext = true
     const [browser, context] = await this.getContext(options)
     const executor = new this.Executor(this, browser, context, options)
-    await this.afterCreateExecutor?.(executor)
+    try {
+      await this.afterCreateExecutor?.(executor)
+    } catch (err) {
+      onError(err, this.log, 'afterCreateExecutor')
+    }
     this.executors.push(executor)
 
     this.indicators.num_bots ++
@@ -93,7 +110,11 @@ export class Driver {
 
     await this.clearExecutor(executor, options)
     this.updateRuns(options)
-    await this.afterExec?.(operations, options)
+    try {
+      await this.afterExec?.(operations, options)
+    } catch (err) {
+      onError(err, this.log, 'afterExec')
+    }
     this.userCache.save()
   }
 
@@ -206,7 +227,11 @@ export class Driver {
   }
 
   async close () {
-    await this.beforeClose?.()
+    try {
+      await this.beforeClose?.()
+    } catch (err) {
+      onError(err, this.log, 'beforeClose')
+    }
     const ps = []
     if (this.context) {
       ps.push(this.context.close())
@@ -229,7 +254,11 @@ export class Driver {
       this.headlessBrowser = null
     }
     await Promise.all(ps).catch(Function())
-    await this.afterClose?.()
+    try {
+      await this.afterClose?.()
+    } catch (err) {
+      onError(err, this.log, 'afterClose')
+    }
   }
 }
 

@@ -9,11 +9,7 @@ import fsUtils from '../fsUtils.js'
 import Storage from '../storage.js'
 import Loader from './loader.js'
 import Dumper from './dumper.js'
-import {
-  parseSelectors,
-  chainLocator,
-  onError
-} from './utils.js'
+import { parseSelectors, chainLocator, onError } from './utils.js'
 
 export class Executor {
   constructor (driver, browser, context, config = {}) {
@@ -53,7 +49,11 @@ export class Executor {
   }
 
   async init () {
-    await this.beforeInit?.()
+    try {
+      await this.beforeInit?.()
+    } catch (err) {
+      onError(err, this.log, 'executor beforeInit')
+    }
     const { storageDir, org, name } = this.config
     const dir = path.join(storageDir, org)
     await fsUtils.mkdir(dir)
@@ -62,7 +62,11 @@ export class Executor {
       autoLoad: true,
       autoSave: false
     })
-    await this.afterInit?.()
+    try {
+      await this.afterInit?.()
+    } catch (err) {
+      onError(err, this.log, 'executor afterInit')
+    }
   }
 
   get safeThis () {
@@ -81,7 +85,11 @@ export class Executor {
   }
 
   async execute (operations, source, ...props) {
-    await this.beforeExecute?.(operations, source, ...props)
+    try {
+      await this.beforeExecute?.(operations, source, ...props)
+    } catch (err) {
+      onError(err, this.log, 'beforeExecute')
+    }
     const execTypes = ['if', 'elseIf', 'else', 'switch', 'for', 'dynamic', 'withFrame']
     // const shouldLog = [...execTypes, 'exec', 'use', 'func', 'comment'].includes(source)
     for (let ele of operations) {
@@ -101,11 +109,15 @@ export class Executor {
       try {
         await this[ele[0]](...args)
       } catch (err) {
-        return onError(err, this.log)
+        return onError(err, this.log, 'execute')
       }
     }
     this.cache.save()
-    await this.afterExecute?.(operations, source, ...props)
+    try {
+      await this.afterExecute?.(operations, source, ...props)
+    } catch (err) {
+      onError(err, this.log, 'afterExecute')
+    }
   }
 
   async goto (url, options) {
@@ -113,21 +125,41 @@ export class Executor {
     url ||= this.config.homeUrl + '/blank/index.html'
     if (!this.page) {
       this.page = await this.context.newPage()
-      await this.afterNewPage?.(this.page, url, options)
+      try {
+        await this.afterNewPage?.(this.page, url, options)
+      } catch (err) {
+        onError(err, this.log, 'afterNewPage')
+      }
     }
     this.topPage = this.topPage || this.page
-    await this.beforeGoto?.(url, options)
+    try {
+      await this.beforeGoto?.(url, options)
+    } catch (err) {
+      onError(err, this.log, 'beforeGoto')
+    }
     await this.page.goto(url, options)
-    await this.afterGoto?.(url, options)
+    try {
+      await this.afterGoto?.(url, options)
+    } catch (err) {
+      onError(err, this.log, 'afterGoto')
+    }
     if (!hasUrl) {
       await this.eval(`$one('#app').remove()`)
     }
   }
 
   async reload (options) {
-    await this.beforeReload?.(options)
+    try {
+      await this.beforeReload?.(options)
+    } catch (err) {
+      onError(err, this.log, 'beforeReload')
+    }
     await this.page.reload(options)
-    await this.afterReload?.(options)
+    try {
+      await this.afterReload?.(options)
+    } catch (err) {
+      onError(err, this.log, 'afterReload')
+    }
   }
 
   wait (name, ...props) {
@@ -525,7 +557,7 @@ export class Executor {
       operations = await operations(this.safeThis)
     }
     return Promise.all(operations.map(ele => {
-      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log))
+      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log, 'promiseAll'))
     }))
   }
 
@@ -534,7 +566,7 @@ export class Executor {
       operations = await operations(this.safeThis)
     }
     return Promise.race(operations.map(ele => {
-      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log))
+      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log, 'promiseRace'))
     }))
   }
 
@@ -543,7 +575,7 @@ export class Executor {
       operations = await operations(this.safeThis)
     }
     return Promise.any(operations.map(ele => {
-      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log))
+      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log, 'promiseAny'))
     }))
   }
 
@@ -967,9 +999,17 @@ export class Executor {
   }
 
   async close () {
-    await this.beforeClose?.()
+    try {
+      await this.beforeClose?.()
+    } catch (err) {
+      onError(err, this.log, 'beforeClose')
+    }
     await this.page.close()
-    await this.afterClose?.()
+    try {
+      await this.afterClose?.()
+    } catch (err) {
+      onError(err, this.log, 'afterClose')
+    }
   }
 }
 
