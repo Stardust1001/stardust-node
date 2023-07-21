@@ -57,6 +57,14 @@ export class Loader {
     }
   }
 
+  static async doc (filepath, options = {}) {
+    const { toHtml } = options
+    if (toHtml) {
+      return mammoth.convertToHtml({ path: filepath })
+    }
+    return filepath
+  }
+
   static getCellValue (value) {
     if (typeof value === 'string') {
       value = value.trim()
@@ -73,6 +81,7 @@ export class Loader {
   static TYPE_DICT = {
     json: 'json',
     xlsx: 'excel',
+    docx: 'doc',
     csv: 'csv',
     txt: 'text'
   }
