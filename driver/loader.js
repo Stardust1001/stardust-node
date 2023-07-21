@@ -62,7 +62,7 @@ export class Loader {
     if (toHtml) {
       return mammoth.convertToHtml({ path: filepath })
     }
-    return filepath
+    throw '不支持的Doc文件加载操作'
   }
 
   static getCellValue (value) {
