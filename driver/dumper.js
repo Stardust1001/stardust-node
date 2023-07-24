@@ -10,12 +10,12 @@ export class Dumper {
 
   static json (data, filepath, options) {
     const text = JSON.stringify(data, null, 2)
-    return Dumper.text(filepath, text, options)
+    return Dumper.text(text, filepath, options)
   }
 
   static  csv (data, filepath, options) {
     const text = encoding.transform(Papa.unparse(data), 'utf-8', 'gbk')
-    return Dumper.text(filepath, text, options)
+    return Dumper.text(text, filepath, options)
   }
 
   static excel (data, filepath, options) {
