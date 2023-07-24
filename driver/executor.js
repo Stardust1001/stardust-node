@@ -593,7 +593,7 @@ export class Executor {
       if (typeof operations === 'function') {
         ops = await operations(this.safeThis, item, i, ...props)
       }
-      await this.execute(ops, 'for', [i, item], ...props)
+      await this.execute(ops, 'for', [item, i], ...props)
     }
   }
 
