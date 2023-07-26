@@ -342,7 +342,7 @@ export class Executor {
   }
 
   fill (selector, value, options) {
-    return this.locator(selector, options).fill(value, options)
+    return this.locator(selector, options).fill((value || '') + '', options)
   }
 
   type (selector, value, options) {
