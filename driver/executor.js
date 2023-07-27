@@ -283,11 +283,11 @@ export class Executor {
     return (await this.waitFor(selector, options)).boundingBox(options)
   }
 
-  async check (selector, options = {}) {
+  async checkFor (selector, options = {}) {
     return (await this.waitFor(selector, options)).check(options)
   }
 
-  async uncheck (selector, options = {}) {
+  async uncheckFor (selector, options = {}) {
     return (await this.waitFor(selector, options)).uncheck(options)
   }
 
@@ -367,8 +367,9 @@ export class Executor {
       ...options
     }
     keys = Array.isArray(keys) ? keys : [keys]
+    const loc = await this.waitFor(selector, options)
     for (let key of keys) {
-      (await this.waitFor(selector, options)).press(key, options)
+      loc.press(key, options)
       await this.sleep(options.interval)
     }
   }
@@ -475,8 +476,8 @@ export class Executor {
     return (await this.waitFor(selector, options)).innerText(options)
   }
 
-  content (selector, options) {
-    return this.lastCommand(selector).textContent(options)
+  async content (selector, options) {
+    return (await this.waitFor(selector)).textContent(options)
   }
 
   async withFrame (selector, operations, options) {
@@ -625,24 +626,6 @@ export class Executor {
 
   func (fun, ...props) {
     return fun(this.safeThis, ...props)
-  }
-
-  all (operations) {
-    return Promise.all(operations.map(op => {
-      return this[op[0]](...op.slice(1))
-    }))
-  }
-
-  race (operations) {
-    return Promise.race(operations.map(op => {
-      return this[op[0]](...op.slice(1))
-    }))
-  }
-
-  any (operations) {
-    return Promise.any(operations.map(op => {
-      return this[op[0]](...op.slice(1))
-    }))
   }
 
   async prompt (selector, options) {
