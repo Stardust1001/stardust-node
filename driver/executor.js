@@ -166,8 +166,12 @@ export class Executor {
     return this.page['wait' + name](...props)
   }
 
-  waitFor (selector, options) {
-    return this.locator(selector, options).waitFor(options)
+  async waitFor (selector, options = {}) {
+    options.state ||= 'visible'
+    const loc = this.locator(selector, options)
+    await loc.waitFor(options)
+    options.force ??= true
+    return loc
   }
 
   waitOr (selectors, options) {
@@ -271,59 +275,59 @@ export class Executor {
     return this.page['get' + what](value, options)
   }
 
-  blur (selector, options) {
-    return this.locator(selector, options).blur(options)
+  async blur (selector, options = {}) {
+    return (await this.waitFor(selector, options)).blur(options)
   }
 
-  box (selector, options) {
-    return this.locator(selector, options).boundingBox(options)
+  async box (selector, options = {}) {
+    return (await this.waitFor(selector, options)).boundingBox(options)
   }
 
-  check (selector, options) {
-    return this.locator(selector, options).check(options)
+  async check (selector, options = {}) {
+    return (await this.waitFor(selector, options)).check(options)
   }
 
-  uncheck (selector, options) {
-    return this.locator(selector, options).uncheck(options)
+  async uncheck (selector, options = {}) {
+    return (await this.waitFor(selector, options)).uncheck(options)
   }
 
-  clear (selector, options) {
-    return this.locator(selector, options).clear(options)
+  async clear (selector, options = {}) {
+    return (await this.waitFor(selector, options)).clear(options)
   }
 
-  click (selector, options) {
-    return this.locator(selector, options).click(options)
+  async click (selector, options = {}) {
+    return (await this.waitFor(selector, options)).click(options)
   }
 
-  count (selector, options) {
-    return this.locator(selector, options).count(options)
+  async count (selector, options = {}) {
+    return (await this.waitFor(selector, options)).count(options)
   }
 
-  dblclick (selector, options) {
-    return this.locator(selector, options).dblclick(options)
+  async dblclick (selector, options = {}) {
+    return (await this.waitFor(selector, options)).dblclick(options)
   }
 
-  dragTo (selector, targetSelector, options) {
-    return this.locator(selector, options).dragTo(this.locator(targetSelector), options)
+  async dragTo (selector, targetSelector, options = {}) {
+    return (await this.waitFor(selector, options)).dragTo(this.locator(targetSelector), options)
   }
 
   eval (func, args = {}) {
     return (args.page || this.page).evaluate(func, args)
   }
 
-  async evalOn (selector, func, options) {
+  async evalOn (selector, func, options = {}) {
     if (typeof func === 'string') {
       func = eval('node => ' + func)
     }
-    return this.locator(selector, options).evaluate(func, options)
+    return (await this.waitFor(selector, options)).evaluate(func, options)
   }
 
-  evalOnAll (selector, func, options) {
-    return this.locator(selector, options).evaluateAll(func, options)
+  async evalOnAll (selector, func, options = {}) {
+    return (await this.waitFor(selector, options)).evaluateAll(func, options)
   }
 
-  evaluateHandle (selector, func, args, options) {
-    return this.locator(selector, options).evaluateHandle(func, args, options)
+  async evaluateHandle (selector, func, args, options = {}) {
+    return (await this.waitFor(selector, options)).evaluateHandle(func, args, options)
   }
 
   async set (selector, attr, value, bySetter = false) {
@@ -341,52 +345,52 @@ export class Executor {
     `)
   }
 
-  fill (selector, value, options) {
-    return this.locator(selector, options).fill((value || '') + '', options)
+  async fill (selector, value, options = {}) {
+    return (await this.waitFor(selector, options)).fill(value, options)
   }
 
-  type (selector, value, options) {
-    return this.locator(selector, options).type(value, options)
+  async type (selector, value, options = {}) {
+    return (await this.waitFor(selector, options)).type(value, options)
   }
 
-  focus (selector, options) {
-    return this.locator(selector, options).focus(options)
+  async focus (selector, options = {}) {
+    return (await this.waitFor(selector, options)).focus(options)
   }
 
-  hover (selector, options) {
-    return this.locator(selector, options).hover(options)
+  async hover (selector, options = {}) {
+    return (await this.waitFor(selector, options)).hover(options)
   }
 
-  async press (selector, keys, options) {
+  async press (selector, keys, options = {}) {
     options = {
       interval: 20,
       ...options
     }
     keys = Array.isArray(keys) ? keys : [keys]
     for (let key of keys) {
-      await this.locator(selector, options).press(key, options)
+      (await this.waitFor(selector, options)).press(key, options)
       await this.sleep(options.interval)
     }
   }
 
-  tap (selector, options) {
-    return this.locator(selector, options).tap(options)
+  async tap (selector, options = {}) {
+    return (await this.waitFor(selector, options)).tap(options)
   }
 
-  select (selector, value, options) {
-    return this.locator(selector, options).selectOption(value, options)
+  async select (selector, value, options = {}) {
+    return (await this.waitFor(selector, options)).selectOption(value, options)
   }
 
-  check (selector, value, options) {
-    return this.locator(selector, options).setChecked(value, options)
+  async check (selector, value, options = {}) {
+    return (await this.waitFor(selector, options)).setChecked(value, options)
   }
 
-  upload (selector, value, options) {
-    return this.locator(selector, options).setInputFiles(value, options)
+  async upload (selector, value, options = {}) {
+    return (await this.waitFor(selector, options)).setInputFiles(value, options)
   }
 
-  screenshot (selector, options) {
-    return this.locator(selector, options).screenshot(options)
+  async screenshot (selector, options = {}) {
+    return (await this.waitFor(selector, options)).screenshot(options)
   }
 
   async accept (value, operations) {
@@ -451,24 +455,24 @@ export class Executor {
     return this.keyboard('press', 'Enter')
   }
 
-  view (selector, options) {
-    return this.locator(selector, options).scrollIntoViewIfNeeded(options)
+  async view (selector, options = {}) {
+    return (await this.waitFor(selector, options)).scrollIntoViewIfNeeded(options)
   }
 
-  attr (selector, name, options) {
-    return this.locator(selector, options).getAttribute(name, options)
+  async attr (selector, name, options = {}) {
+    return (await this.waitFor(selector, options)).getAttribute(name, options)
   }
 
-  call (selector, method, options) {
-    return this.locator(selector, options)[method](options)
+  async call (selector, method, options = {}) {
+    return (await this.waitFor(selector, options))[method](options)
   }
 
-  html (selector, options) {
-    return this.locator(selector, options).innerHTML(options)
+  async html (selector, options = {}) {
+    return (await this.waitFor(selector, options)).innerHTML(options)
   }
 
-  text (selector, options) {
-    return this.locator(selector, options).innerText(options)
+  async text (selector, options = {}) {
+    return (await this.waitFor(selector, options)).innerText(options)
   }
 
   content (selector, options) {
