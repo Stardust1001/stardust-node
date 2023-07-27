@@ -120,6 +120,17 @@ export class Executor {
     }
   }
 
+  async ui (operations, options) {
+    options = {
+      interval: 10,
+      slow: 10,
+      ...options
+    }
+    await this.eval(({ operations, options }) => {
+      return new StardustBrowser.UIExecutor(options).execute(operations, options)
+    }, { operations, options })
+  }
+
   async goto (url, options) {
     const hasUrl = !!url
     url ||= this.config.homeUrl + '/blank/index.html'
