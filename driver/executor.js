@@ -127,6 +127,9 @@ export class Executor {
       ...options
     }
     await this.eval(({ operations, options }) => {
+      if (typeof operations === 'string') {
+        operations = window.eval(operations)
+      }
       return new StardustBrowser.UIExecutor(options).execute(operations, options)
     }, { operations, options })
   }
