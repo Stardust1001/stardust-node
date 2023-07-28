@@ -90,18 +90,14 @@ export class Executor {
     } catch (err) {
       onError(err, this.log, 'beforeExecute')
     }
-    const execTypes = ['if', 'elseIf', 'else', 'switch', 'for', 'dynamic', 'withFrame']
-    // const shouldLog = [...execTypes, 'exec', 'use', 'func', 'comment'].includes(source)
+    const execTypes = [
+      'if', 'elseIf', 'else', 'switch',
+      'for', 'while',
+      'dynamic', 'withFrame',
+      'accept', 'dismiss',
+      'waitForLoadState', 'follow'
+    ]
     for (let ele of operations) {
-      if (ele[0] !== 'log') {
-        // if (shouldLog) {
-        //   if (Array.isArray(ele[2])) {
-        //     this.log(ele.slice(0, 2))
-        //   } else {
-        //     this.log(ele)
-        //   }
-        // }
-      }
       const args = [...ele.slice(1)]
       if ([...execTypes, 'func', 'comment'].includes(ele[0])) {
         args.push(...props)
@@ -494,12 +490,16 @@ export class Executor {
     return (await this.waitFor(selector)).textContent(options)
   }
 
-  async withFrame (selector, operations, options) {
+  async withFrame (selector, operations, options = {}) {
+    options = {
+      interval: 20,
+      ...options
+    }
     let frame
     while (!frame) {
       frame = this.page.frame(selector, options)
       if (frame) break
-      await funcs.sleep(20)
+      await funcs.sleep(options.interval)
     }
     const executor = new Executor(this.driver, this.browser, this.context, {
       ...this.config,
@@ -507,6 +507,7 @@ export class Executor {
       topPage: this.topPage
     })
     executor._initialBot = this._initialBot
+    await frame.waitForLoadState()
     return executor.execute(operations, 'withFrame')
   }
 
