@@ -25,8 +25,10 @@ export class Executor {
     this.libs = {
       fs,
       path,
+      crypto,
       Papa,
       Excel,
+      randomUa
     }
     this.utils = {
       funcs,
