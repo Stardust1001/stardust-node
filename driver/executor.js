@@ -624,6 +624,7 @@ export class Executor {
       inPage: true,
       ...options
     }
+    let i = 0
     while (true) {
       let ok = false
       if (typeof func === 'function' && !options.inPage) {
@@ -632,7 +633,11 @@ export class Executor {
         ok = await this.page.evaluate(func)
       }
       if (!ok) break
-      await this.execute(operations, 'while')
+      let ops = operations
+      if (typeof operations === 'function') {
+        ops = await operations(this.safeThis, i++)
+      }
+      await this.execute(ops, 'while')
     }
   }
 
@@ -670,7 +675,6 @@ export class Executor {
 
   async save (data, saveTo, key, options) {
     options = { comment: true, ...options }
-    const { header } = options
     if (typeof data === 'function') {
       data = await data(this.safeThis)
     }
