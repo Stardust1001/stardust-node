@@ -44,7 +44,8 @@ export class Executor {
     }
 
     this.isExcuting = false
-    this._isInIf = false
+    this._state = {}
+    this._ifs = []
     this._initialBot = this.config
     this._currentBot = this.config
     this.init()
@@ -99,7 +100,16 @@ export class Executor {
       'accept', 'dismiss',
       'waitForLoadState', 'follow'
     ]
-    for (let ele of operations) {
+    for (let i = 0, len = operations.length; i < len; i++) {
+      const ele = operations[i]
+      Object.assign(this._state, {
+        lastIndex: i - 1,
+        currentIndex: i,
+        nextIndex: i + 1,
+        last: operations[i - 1],
+        current: ele,
+        next: operations[i + 1]
+      })
       const args = [...ele.slice(1)]
       if ([...execTypes, 'func', 'comment'].includes(ele[0])) {
         args.push(...props)
@@ -514,7 +524,7 @@ export class Executor {
   }
 
   async if (func, operations, ...props) {
-    this._isInIf = true
+    this._ifs.push(false)
     let ok
     if (typeof func === 'function') {
       ok = await func(this.safeThis, ...props)
@@ -527,9 +537,14 @@ export class Executor {
       }
       await this.execute(operations, 'if', ...props)
     }
+    this._ifs[this._ifs.length - 1] = ok
+    if (!['elseIf', 'else'].includes(this._state.next?.[0])) {
+      this._ifs.pop()
+    }
   }
 
   async elseIf (func, operations, ...props) {
+    if (this._ifs[this._ifs.length - 1]) return
     let ok
     if (typeof func === 'function') {
       ok = await func(this.safeThis, ...props)
@@ -542,16 +557,19 @@ export class Executor {
       }
       await this.execute(operations, 'elseIf', ...props)
     }
+    this._ifs[this._ifs.length - 1] = ok
+    if (!['elseIf', 'else'].includes(this._state.next?.[0])) {
+      this._ifs.pop()
+    }
   }
 
   async else (operations, ...props) {
-    if (this._isInIf) {
-      if (typeof operations === 'function') {
-        operations = await operations(this.safeThis, ...props)
-      }
-      await this.execute(operations, 'else', ...props)
+    if (this._ifs[this._ifs.length - 1]) return
+    if (typeof operations === 'function') {
+      operations = await operations(this.safeThis, ...props)
     }
-    this._isInIf = false
+    await this.execute(operations, 'else', ...props)
+    this._ifs.pop()
   }
 
   async switch (value, cases, ...props) {
