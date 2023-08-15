@@ -89,6 +89,7 @@ export class Driver {
       newBrowser: false,
       newContext: false,
       log: this.log,
+      Executor: this.Executor,
       ...this.config,
       ...options
     }

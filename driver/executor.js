@@ -142,6 +142,17 @@ export class Executor {
     }, { operations, options })
   }
 
+  async newPage () {
+    const page = await this.context.newPage()
+    const executor = new this.config.Executor(this.driver, this.browser, this.context, {
+      ...this.config,
+      page,
+      topPage: this.topPage
+    })
+    this.executors.push(executor)
+    return executor
+  }
+
   async goto (url, options) {
     const hasUrl = !!url
     url ||= this.config.homeUrl + '/blank/index.html'
@@ -516,7 +527,7 @@ export class Executor {
       if (frame) break
       await funcs.sleep(options.interval)
     }
-    const executor = new Executor(this.driver, this.browser, this.context, {
+    const executor = new this.config.Executor(this.driver, this.browser, this.context, {
       ...this.config,
       page: frame,
       topPage: this.topPage
