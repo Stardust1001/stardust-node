@@ -191,7 +191,7 @@ export class Executor {
   async waitFor (selector, options = {}) {
     options.state ||= 'visible'
     const loc = this.locator(selector, options)
-    await loc.waitFor(options)
+    await loc.waitFor(options).catch(err => onError(err, this.log, 'waitFor'))
     options.force ??= true
     return loc
   }
