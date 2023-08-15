@@ -142,7 +142,7 @@ export class Executor {
     }, { operations, options })
   }
 
-  async newPage () {
+  async new () {
     const page = await this.context.newPage()
     const executor = new this.config.Executor(this.driver, this.browser, this.context, {
       ...this.config,
@@ -1044,6 +1044,7 @@ export class Executor {
     } catch (err) {
       onError(err, this.log, 'beforeClose')
     }
+    await Promise.all(this.executors.map(e => e.page?.close()?.catch(Function())))
     await this.page.close()
     try {
       await this.afterClose?.()
