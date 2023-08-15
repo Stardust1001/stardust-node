@@ -213,6 +213,9 @@ export class Executor {
   }
 
   waitForFunction (func, args, options) {
+    if (typeof func === 'string') {
+      func = `try { ${func} } catch { }`
+    }
     return this.page.waitForFunction(func, args, options)
   }
 
