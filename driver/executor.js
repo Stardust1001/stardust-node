@@ -656,6 +656,9 @@ export class Executor {
       inPage: true,
       ...options
     }
+    if (typeof func === 'string') {
+      func = `try { ${func} } catch { }`
+    }
     let i = 0
     while (true) {
       let ok = false
