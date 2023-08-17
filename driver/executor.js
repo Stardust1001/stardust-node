@@ -686,7 +686,25 @@ export class Executor {
     return fun(this.safeThis, ...props)
   }
 
+  reserveDialog (options) {
+    options = {
+      once: true,
+      timeout: Infinity,
+      ...options
+    }
+    this.page[options.once ? 'once' : 'on']('dialog', async dialog => {
+      dialog._dismiss = dialog.dismiss
+      dialog.dismiss = () => Promise.resolve()
+      if (options.timeout !== Infinity) {
+        await this.sleep(options.timeout)
+      }
+      dialog.dismiss = dialog._dismiss
+      dialog.dismiss().catch(Function())
+    })
+  }
+
   async prompt (selector, options) {
+    this.reserveDialog({ once: true })
     options = {
       placeholder: '请输入验证码',
       ...options
