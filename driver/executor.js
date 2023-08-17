@@ -697,9 +697,9 @@ export class Executor {
       dialog.dismiss = () => Promise.resolve()
       if (options.timeout !== Infinity) {
         await this.sleep(options.timeout)
+        dialog.dismiss = dialog._dismiss
+        dialog.dismiss().catch(Function())
       }
-      dialog.dismiss = dialog._dismiss
-      dialog.dismiss().catch(Function())
     })
   }
 
