@@ -17,6 +17,7 @@ export class Executor {
     this.browser = browser
     this.context = context
     this.config = config
+    this.executors = []
     this.page = config.page
     this.topPage = config.topPage
     this.cache = null

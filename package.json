@@ -1,6 +1,6 @@
 {
   "name": "@stardust-js/node",
-  "version": "1.0.82",
+  "version": "1.0.83",
   "description": "Everything I want to publish here",
   "type": "module",
   "main": "index.js",
