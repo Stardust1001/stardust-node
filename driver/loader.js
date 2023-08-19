@@ -14,7 +14,7 @@ export class Loader {
     return JSON.parse(text || null)
   }
 
-  static async csv () {
+  static async csv (filepath, options) {
     const text = await Loader.text(filepath, options)
     return Papa.parse(text)
   }
