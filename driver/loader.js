@@ -73,6 +73,8 @@ export class Loader {
         value = value.richText.map(e => e.text).join('')
       } else if (value.text) {
         value = value.text
+      } else if (value.result) {
+        value = value.result
       }
     }
     return value
