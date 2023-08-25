@@ -20,7 +20,7 @@ export class Loader {
   }
 
   static async excel (filepath, options = {}) {
-    let { sheetNames = ['Sheet1'], withHidden = false } = options
+    let { sheetNames = ['Sheet1'], withHiddenRows = false, withHiddenCols = false } = options
     const workbook = new Excel.Workbook()
     await workbook.xlsx.readFile(filepath)
     if (sheetNames === '*') {
@@ -33,24 +33,30 @@ export class Loader {
       sheets: sheetNames.map(name => {
         const sheet = workbook.getWorksheet(name)
         const list = () => {
-          const rows = withHidden ? sheet.getSheetValues() : sheet._rows.filter(r => !r.hidden).map(r => r.values)
-          for (let i = 0, rowCount = rows.length; i < rowCount; i++) {
-            rows[i] ??= []
-            for (let j = 0, cellCount = rows[i].length; j < cellCount; j++) {
-              rows[i][j] = Loader.getCellValue(rows[i][j])
+          const hiddenColsIndices = sheet._columns.map((c, i) => [i, c.hidden]).filter(e => e[1]).map(e => e[0])
+          const rows = []
+          sheet._rows.forEach(row => {
+            if (!withHiddenRows && row.hidden) return
+            let values = []
+            if (withHiddenCols || !hiddenColsIndices.length) {
+              values = row.values
+            } else {
+              values = row.values.filter((v, i) => !hiddenColsIndices.includes(i))
             }
-          }
+            rows.push(values.map(Loader.getCellValue))
+          })
           return rows.filter(r => r.length)
         }
         const json = () => {
           const rows = list()
           const headerIndex = options.headerRowIndex || 0
           const header = rows[headerIndex]
-          return rows.slice(headerIndex + 1).map(r => {
+          const data = rows.slice(headerIndex + 1).map(r => {
             const dict = {}
             r.forEach((v, i) => dict[header[i]] = v)
             return dict
           })
+          return data
         }
         return { sheet, list, json }
       })
