@@ -5,6 +5,7 @@ import Papa from 'papaparse'
 import Excel from 'exceljs'
 import randomUa from 'random-useragent'
 import { funcs, highdict, dates } from '@stardust-js/js'
+import nodeFuncs from '../funcs.js'
 import fsUtils from '../fsUtils.js'
 import Storage from '../storage.js'
 import Loader from './loader.js'
@@ -36,6 +37,8 @@ export class Executor {
       highdict,
       dates,
       fsUtils,
+      nodeFuncs,
+      ...nodeFuncs,
       ...funcs,
       ...highdict,
       ...dates,
