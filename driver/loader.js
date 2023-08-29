@@ -20,7 +20,7 @@ export class Loader {
   }
 
   static async excel (filepath, options = {}) {
-    let { sheetNames = ['Sheet1'], withHiddenRows = false, withHiddenCols = false } = options
+    let { sheetNames = ['Sheet1'], withHiddenRows = false, withHiddenCols = false, filterRow = true } = options
     const workbook = new Excel.Workbook()
     await workbook.xlsx.readFile(filepath)
     if (sheetNames === '*') {
@@ -45,7 +45,7 @@ export class Loader {
             }
             rows.push(values.map(Loader.getCellValue))
           })
-          return rows.filter(r => r.length)
+          return filterRow ? rows.filter(r => r.length) : rows
         }
         const json = () => {
           const rows = list()
