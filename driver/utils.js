@@ -25,15 +25,22 @@ export const chainLocator = (locator, options) => {
   return locator
 }
 
-export const onError = (err, log = console.log, label = '') => {
-  log('Error: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -- ' + label)
+export const onError = (err, executor, label = '') => {
+  const log = executor.log || console.log
+  let message
   if (err?.stack) {
-    log('Error: ' + err.stack.toString())
+    message = '[Error]: ' + err.stack.toString()
   } else if (err?.message) {
-    log('Error: ' + err.message.toString())
+    message = '[Error]: ' + err.message.toString()
   } else {
-    log('Error: ' + err?.toString())
+    message = '[Error]: ' + err?.toString()
   }
+  log('[Error]: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -- ' + label)
+  log(message)
+  executor.comment(message, {
+    backgroundColor: 'red',
+    cssText: 'position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 999999; font-size: 20px;'
+  })
 }
 
 export default {

@@ -59,7 +59,7 @@ export class Executor {
     try {
       await this.beforeInit?.()
     } catch (err) {
-      onError(err, this.log, 'executor beforeInit')
+      onError(err, this, 'executor beforeInit')
     }
     const { storageDir, org, name } = this.config
     const dir = path.join(storageDir, org)
@@ -72,7 +72,7 @@ export class Executor {
     try {
       await this.afterInit?.()
     } catch (err) {
-      onError(err, this.log, 'executor afterInit')
+      onError(err, this, 'executor afterInit')
     }
   }
 
@@ -95,7 +95,7 @@ export class Executor {
     try {
       await this.beforeExecute?.(operations, source, ...props)
     } catch (err) {
-      onError(err, this.log, 'beforeExecute')
+      onError(err, this, 'beforeExecute')
     }
     const execTypes = [
       'if', 'elseIf', 'else', 'switch',
@@ -121,14 +121,14 @@ export class Executor {
       try {
         await this[ele[0]](...args)
       } catch (err) {
-        return onError(err, this.log, 'execute')
+        return onError(err, this, 'execute')
       }
     }
     this.cache.save()
     try {
       await this.afterExecute?.(operations, source, ...props)
     } catch (err) {
-      onError(err, this.log, 'afterExecute')
+      onError(err, this, 'afterExecute')
     }
   }
 
@@ -165,20 +165,20 @@ export class Executor {
       try {
         await this.afterNewPage?.(this.page, url, options)
       } catch (err) {
-        onError(err, this.log, 'afterNewPage')
+        onError(err, this, 'afterNewPage')
       }
     }
     this.topPage = this.topPage || this.page
     try {
       await this.beforeGoto?.(url, options)
     } catch (err) {
-      onError(err, this.log, 'beforeGoto')
+      onError(err, this, 'beforeGoto')
     }
     await this.page.goto(url, options)
     try {
       await this.afterGoto?.(url, options)
     } catch (err) {
-      onError(err, this.log, 'afterGoto')
+      onError(err, this, 'afterGoto')
     }
     if (!hasUrl) {
       await this.eval(`$one('#app').remove()`)
@@ -189,13 +189,13 @@ export class Executor {
     try {
       await this.beforeReload?.(options)
     } catch (err) {
-      onError(err, this.log, 'beforeReload')
+      onError(err, this, 'beforeReload')
     }
     await this.page.reload(options)
     try {
       await this.afterReload?.(options)
     } catch (err) {
-      onError(err, this.log, 'afterReload')
+      onError(err, this, 'afterReload')
     }
   }
 
@@ -206,7 +206,7 @@ export class Executor {
   async waitFor (selector, options = {}) {
     options.state ||= 'visible'
     const loc = this.locator(selector, options)
-    await loc.waitFor(options).catch(err => onError(err, this.log, 'waitFor'))
+    await loc.waitFor(options).catch(err => onError(err, this, 'waitFor'))
     options.force ??= true
     return loc
   }
@@ -615,7 +615,7 @@ export class Executor {
       operations = await operations(this.safeThis)
     }
     return Promise.all(operations.map(ele => {
-      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log, 'promiseAll'))
+      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this, 'promiseAll'))
     }))
   }
 
@@ -624,7 +624,7 @@ export class Executor {
       operations = await operations(this.safeThis)
     }
     return Promise.race(operations.map(ele => {
-      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log, 'promiseRace'))
+      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this, 'promiseRace'))
     }))
   }
 
@@ -633,7 +633,7 @@ export class Executor {
       operations = await operations(this.safeThis)
     }
     return Promise.any(operations.map(ele => {
-      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this.log, 'promiseAny'))
+      return this[ele[0]](...ele.slice(1)).catch(err => onError(err, this, 'promiseAny'))
     }))
   }
 
@@ -824,10 +824,13 @@ export class Executor {
     const page = options.top ? (this.topPage || this.page) : this.page
     if (page && !this.config.headless) {
       if (!await page.evaluate('!!window.shiki')) {
-        await page.addInitScript(`${this.config.homeUrl}/lib/shiki.min.js`)
+        await page.addScriptTag({
+          url: `${this.config.homeUrl}/lib/shiki.min.js`
+        })
       }
       if (!await page.evaluate('!!window.shikiHighlighter')) {
         await page.evaluate(`
+          shiki.setCDN('${this.config.homeUrl}/lib/shiki');
           new Promise(async resolve => {
             window.shikiHighlighter = await shiki.getHighlighter({
               theme: 'material-theme-palenight',
@@ -862,6 +865,7 @@ export class Executor {
         const node = document.createElement('div')
         node.innerHTML = html
         node.style.overflowX = 'auto'
+        node.style.cssText += options.cssText
         const pre = node.querySelector('pre')
         if (pre) {
           pre.style.margin = '1px 2px'
@@ -888,6 +892,10 @@ export class Executor {
     options = { ...options }
     if (!await fsUtils.exists(filepath)) {
       throw '文件不存在: ' + filepath
+    }
+    const extname = path.extname(filepath).toLowerCase()
+    if (['.xls', '.doc', '.ppt'].includes(extname)) {
+      throw '不支持 ' + extname + ' 文件，请另存为 ' + extname + 'x 文件'
     }
     const type = options.type || Loader.getFileType(filepath)
     const content = await Loader[type](filepath, options)
@@ -1067,14 +1075,14 @@ export class Executor {
     try {
       await this.beforeClose?.()
     } catch (err) {
-      onError(err, this.log, 'beforeClose')
+      onError(err, this, 'beforeClose')
     }
     await Promise.all(this.executors.map(e => e.page?.close()?.catch(Function())))
     await this.page.close()
     try {
       await this.afterClose?.()
     } catch (err) {
-      onError(err, this.log, 'afterClose')
+      onError(err, this, 'afterClose')
     }
   }
 }
