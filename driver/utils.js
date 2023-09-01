@@ -26,13 +26,13 @@ export const chainLocator = (locator, options) => {
 }
 
 export const onError = (err, log = console.log, label = '') => {
-  log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -- ' + label)
+  log('Error: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -- ' + label)
   if (err?.stack) {
-    log(err.stack.toString())
+    log('Error: ' + err.stack.toString())
   } else if (err?.message) {
-    log(err.message.toString())
+    log('Error: ' + err.message.toString())
   } else {
-    log(err?.toString())
+    log('Error: ' + err?.toString())
   }
 }
 
