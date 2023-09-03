@@ -204,9 +204,15 @@ export class Executor {
   }
 
   async waitFor (selector, options = {}) {
-    options.state ||= 'visible'
+    options = {
+      ignoreError: true,
+      state: 'visible',
+      ...options
+    }
     const loc = this.locator(selector, options)
-    await loc.waitFor(options).catch(err => onError(err, this, 'waitFor'))
+    await loc.waitFor(options).catch(err => {
+      if (!options.ignoreError) onError(err, this, 'waitFor')
+    })
     options.force ??= true
     return loc
   }
