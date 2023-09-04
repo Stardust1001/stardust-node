@@ -890,7 +890,7 @@ export class Executor {
           document.documentElement.scrollBy(0, 2000)
         }, [message, options, this.config.apiUrl])
       } catch (err) {
-        const message = '[Error]:' (err?.stack || err?.message || err).toString()
+        const message = '[Error]:' + (err?.stack || err?.message || err).toString()
         this.log(message, { backgroundColor: 'red' })
       }
     }
