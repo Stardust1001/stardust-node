@@ -828,8 +828,8 @@ export class Executor {
       message = await message(this.safeThis, ...props)
     }
     const page = options.top ? (this.topPage || this.page) : this.page
-    if (!page || page.isClosed()) return
     if (page && !this.config.headless) {
+      if (page.isClosed()) return
       try {
         if (!await page.evaluate('!!window.shiki')) {
           await page.addScriptTag({
