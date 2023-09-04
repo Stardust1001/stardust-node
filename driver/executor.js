@@ -830,64 +830,69 @@ export class Executor {
     const page = options.top ? (this.topPage || this.page) : this.page
     if (page.isClosed()) return
     if (page && !this.config.headless) {
-      if (!await page.evaluate('!!window.shiki')) {
-        await page.addScriptTag({
-          url: `${this.config.homeUrl}/lib/shiki.min.js`
-        })
-      }
-      if (!await page.evaluate('!!window.shikiHighlighter')) {
-        await page.evaluate(`
-          shiki.setCDN('${this.config.homeUrl}/lib/shiki');
-          new Promise(async resolve => {
-            window.shikiHighlighter = await shiki.getHighlighter({
-              theme: 'material-theme-palenight',
-              langs: ['js', 'json', 'sh']
-            })
-            resolve()
+      try {
+        if (!await page.evaluate('!!window.shiki')) {
+          await page.addScriptTag({
+            url: `${this.config.homeUrl}/lib/shiki.min.js`
           })
-        `)
-      }
-      await page.evaluate(([message, options, apiUrl]) => {
-        const lang = typeof message === 'object' ? 'json' : 'sh'
-        let html
-        if (lang === 'json') {
-          if (message.type === 'link') {
-            html = `
-              <a
-                target="_blank"
-                href="${message.link}"
-                download="${message.link}"
-              >
-                附件：${message.name}
-              </a>
-            `
-          } else if (message.type === 'html') {
-            html = message.html
+        }
+        if (!await page.evaluate('!!window.shikiHighlighter')) {
+          await page.evaluate(`
+            shiki.setCDN('${this.config.homeUrl}/lib/shiki');
+            new Promise(async resolve => {
+              window.shikiHighlighter = await shiki.getHighlighter({
+                theme: 'material-theme-palenight',
+                langs: ['js', 'json', 'sh']
+              })
+              resolve()
+            })
+          `)
+        }
+        await page.evaluate(([message, options, apiUrl]) => {
+          const lang = typeof message === 'object' ? 'json' : 'sh'
+          let html
+          if (lang === 'json') {
+            if (message.type === 'link') {
+              html = `
+                <a
+                  target="_blank"
+                  href="${message.link}"
+                  download="${message.link}"
+                >
+                  附件：${message.name}
+                </a>
+              `
+            } else if (message.type === 'html') {
+              html = message.html
+            } else {
+              html = window.shikiHighlighter.codeToHtml(JSON.stringify(message, null, 2), { lang })
+            }
           } else {
-            html = window.shikiHighlighter.codeToHtml(JSON.stringify(message, null, 2), { lang })
+            html = window.shikiHighlighter.codeToHtml(message, { lang })
           }
-        } else {
-          html = window.shikiHighlighter.codeToHtml(message, { lang })
-        }
-        const node = document.createElement('div')
-        node.innerHTML = html
-        node.style.overflowX = 'auto'
-        node.style.cssText += options.cssText
-        const pre = node.querySelector('pre')
-        if (pre) {
-          pre.style.margin = '1px 2px'
-          pre.style.padding = '10px'
-          if (options.backgroundColor) {
-            node.style.backgroundColor = options.backgroundColor
-            pre.style.backgroundColor = options.backgroundColor
+          const node = document.createElement('div')
+          node.innerHTML = html
+          node.style.overflowX = 'auto'
+          node.style.cssText += options.cssText
+          const pre = node.querySelector('pre')
+          if (pre) {
+            pre.style.margin = '1px 2px'
+            pre.style.padding = '10px'
+            if (options.backgroundColor) {
+              node.style.backgroundColor = options.backgroundColor
+              pre.style.backgroundColor = options.backgroundColor
+            }
+          } else {
+            node.style.padding = '10px'
           }
-        } else {
-          node.style.padding = '10px'
-        }
-        document.body.appendChild(node)
-        document.body.scrollBy(0, 1000)
-        document.documentElement.scrollBy(0, 2000)
-      }, [message, options, this.config.apiUrl])
+          document.body.appendChild(node)
+          document.body.scrollBy(0, 1000)
+          document.documentElement.scrollBy(0, 2000)
+        }, [message, options, this.config.apiUrl])
+      } catch (err) {
+        const message = '[Error]:' (err?.stack || err?.message || err).toString()
+        this.log(message, { backgroundColor: 'red' })
+      }
     }
     this.log(message, options)
   }
