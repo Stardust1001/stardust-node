@@ -828,7 +828,7 @@ export class Executor {
       message = await message(this.safeThis, ...props)
     }
     const page = options.top ? (this.topPage || this.page) : this.page
-    if (page.isClosed()) return
+    if (!page || page.isClosed()) return
     if (page && !this.config.headless) {
       try {
         if (!await page.evaluate('!!window.shiki')) {
