@@ -20,7 +20,7 @@ export default (config) => {
 
   const isInWhiteList = (ctx) => {
     const { whiteList } = config.jwt
-    const url = ctx.url
+    const url = ctx.url.split('?')[0]
     return whiteList.some(ele => {
       if (ele instanceof RegExp) {
         return ele.test(url)
