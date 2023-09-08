@@ -91,6 +91,20 @@ export class Executor {
     await this.execute(operations, 'use')
   }
 
+  async callBot (code, options) {
+    const [org, name] = code.split('=')
+    const url = this.config.apiUrl + '/bots/call'
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        org,
+        name,
+        ...options
+      })
+    })
+  }
+
   async execute (operations, source, ...props) {
     try {
       await this.beforeExecute?.(operations, source, ...props)
