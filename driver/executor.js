@@ -267,24 +267,38 @@ export class Executor {
   async waitForNext (title = '下一步', options) {
     options = { ...options }
     await this.eval(`
+      const mask = document.createElement('div')
+      mask.style.cssText += \`
+        position: fixed;
+        z-index: 999998;
+        width: 100vw;
+        height: 100vh;
+        left: 0;
+        top: 0;
+        background-color: rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+        ${options.maskStyle}
+      \`
+      document.body.appendChild(mask)
       const button = document.createElement('div')
       const root = '${options.root || ''}'
       document.querySelector(root || 'body').appendChild(button)
       button.style.cssText += \`
-        z-index: 9999;
+        z-index: 999999;
         width: 300px;
         height: 30px;
         line-height: 30px;
         text-align: center;
-        background-color: #409eff;
+        background-color: #ff0040;
         color: white;
+        font-size: 15px;
         cursor: pointer;
         margin: 2px;
       \`
       if (!root) {
         button.style.cssText += \`
           position: fixed;
-          left: 5px;
+          right: 5px;
           bottom: 5px;
         \`
       }
@@ -299,7 +313,11 @@ export class Executor {
       }
       button.textContent = \`${title}\`
       new Promise(resolve => {
-        button.onclick = () => { button.remove(); resolve() }
+        button.onclick = () => {
+          button.remove()
+          mask.remove()
+          resolve()
+        }
       })
     `)
   }
