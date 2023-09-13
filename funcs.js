@@ -18,10 +18,16 @@ export const openUrl = url => {
   child_process.spawn(isWindows() ? 'explorer' : 'open', [url])
 }
 
-export const pipeRes = (res, ctx) => {
+export const pipeRes = (res, ctx, options) => {
+  options = {
+    compress: false,
+    ...options
+  }
   const headers = {}
   Array.from(res.headers.entries()).forEach(([k, v]) => headers[k] = v)
-  delete headers['content-encoding']
+  if (options.compress) {
+    delete headers['content-encoding']
+  }
   delete headers['content-length']
   ctx.res.writeHead(res.status, headers)
   res.body.pipe(ctx.res)
