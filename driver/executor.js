@@ -205,7 +205,7 @@ export class Executor {
   async reload (options) {
     options = {
       ignoreError: true,
-      timeout: Infinity,
+      timeout: 1e9,
       ...options
     }
     try {
@@ -229,7 +229,7 @@ export class Executor {
   wait (name, ...props) {
     const last = props[props.length - 1]
     if (typeof last === 'object' && last.timeout === undefined) {
-      last.timeout = Infinity
+      last.timeout = 1e9
     }
     return this.page['wait' + name](...props)
   }
@@ -238,7 +238,7 @@ export class Executor {
     options = {
       ignoreError: true,
       state: 'visible',
-      timeout: Infinity,
+      timeout: 1e9,
       ...options
     }
     const loc = this.locator(selector, options)
@@ -254,7 +254,7 @@ export class Executor {
 
   waitOr (selectors, options) {
     options = {
-      timeout: Infinity,
+      timeout: 1e9,
       ...options
     }
     let loc = this.locator(selectors[0], options)
@@ -267,7 +267,7 @@ export class Executor {
   waitForURL (url, options) {
     options = {
       ignoreError: true,
-      timeout: Infinity,
+      timeout: 1e9,
       ...options
     }
     return this.page.waitForURL(url, options).then(() => {
@@ -281,7 +281,7 @@ export class Executor {
   waitForEvent (event, optionsOrPredicate, options) {
     options = {
       ignoreError: true,
-      timeout: Infinity,
+      timeout: 1e9,
       ...options
     }
     return this.page.waitForEvent(event, optionsOrPredicate, options).then(() => {
@@ -295,7 +295,7 @@ export class Executor {
   waitForFunction (func, args, options) {
     options = {
       ignoreError: true,
-      timeout: Infinity,
+      timeout: 1e9,
       ...options
     }
     if (typeof func === 'string') {
@@ -312,7 +312,7 @@ export class Executor {
   waitForLoadState (state, operations, options) {
     options = {
       ignoreError: true,
-      timeout: Infinity,
+      timeout: 1e9,
       ...options
     }
     const ps = [
@@ -393,7 +393,7 @@ export class Executor {
 
   locator (selector, options) {
     options = {
-      timeout: Infinity,
+      timeout: 1e9,
       ...options
     }
     const selectors = parseSelectors(selector)
@@ -799,13 +799,13 @@ export class Executor {
   reserveDialog (options) {
     options = {
       once: true,
-      timeout: Infinity,
+      timeout: 1e9,
       ...options
     }
     this.topPage[options.once ? 'once' : 'on']('dialog', async dialog => {
       dialog._dismiss = dialog.dismiss
       dialog.dismiss = () => Promise.resolve()
-      if (options.timeout !== Infinity) {
+      if (options.timeout !== 1e9) {
         await this.sleep(options.timeout)
         dialog.dismiss = dialog._dismiss
         dialog.dismiss().catch(Function())
