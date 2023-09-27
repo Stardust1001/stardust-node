@@ -1020,7 +1020,7 @@ export class Executor {
 
   async fetch (urlOrList, options, transformer, ...props) {
     options = {
-      limit: 10
+      limit: 10,
       ...options
     }
     if (typeof urlOrList === 'function') {
