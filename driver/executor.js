@@ -4,7 +4,7 @@ import crypto from 'crypto'
 import Papa from 'papaparse'
 import Excel from 'exceljs'
 import randomUa from 'random-useragent'
-import { funcs, highdict, dates } from '@stardust-js/js'
+import { funcs, highdict, dates, promises } from '@stardust-js/js'
 import nodeFuncs from '../funcs.js'
 import fsUtils from '../fsUtils.js'
 import Storage from '../storage.js'
@@ -52,6 +52,7 @@ export class Executor {
     this._ifs = []
     this._initialBot = this.config
     this._currentBot = this.config
+    this._waitFailed = false
     this.init()
   }
 
@@ -118,6 +119,7 @@ export class Executor {
       'accept', 'dismiss',
       'waitForLoadState', 'follow'
     ]
+    const lastState = { ...this._state }
     for (let i = 0, len = operations.length; i < len; i++) {
       const ele = operations[i]
       Object.assign(this._state, {
@@ -138,6 +140,7 @@ export class Executor {
         return onError(err, this, 'execute')
       }
     }
+    this._state = lastState
     this.cache.save()
     try {
       await this.afterExecute?.(operations, source, ...props)
@@ -200,12 +203,22 @@ export class Executor {
   }
 
   async reload (options) {
+    options = {
+      ignoreError: true,
+      timeout: Infinity,
+      ...options
+    }
     try {
       await this.beforeReload?.(options)
     } catch (err) {
       onError(err, this, 'beforeReload')
     }
-    await this.page.reload(options)
+    await this.page.reload(options).then(() => {
+      this._waitFailed = false
+    }).catch(err => {
+      this._waitFailed = true
+      if (!options.ignoreError) onError(err, this, 'reload')
+    })
     try {
       await this.afterReload?.(options)
     } catch (err) {
@@ -214,6 +227,10 @@ export class Executor {
   }
 
   wait (name, ...props) {
+    const last = props[props.length - 1]
+    if (typeof last === 'object' && last.timeout === undefined) {
+      last.timeout = Infinity
+    }
     return this.page['wait' + name](...props)
   }
 
@@ -221,10 +238,14 @@ export class Executor {
     options = {
       ignoreError: true,
       state: 'visible',
+      timeout: Infinity,
       ...options
     }
     const loc = this.locator(selector, options)
-    await loc.waitFor(options).catch(err => {
+    await loc.waitFor(options).then(() => {
+      this._waitFailed = false
+    }).catch(err => {
+      this._waitFailed = true
       if (!options.ignoreError) onError(err, this, 'waitFor')
     })
     options.force ??= true
@@ -232,6 +253,10 @@ export class Executor {
   }
 
   waitOr (selectors, options) {
+    options = {
+      timeout: Infinity,
+      ...options
+    }
     let loc = this.locator(selectors[0], options)
     for (let i = 1; i < selectors.length; i++) {
       loc = loc.or(this.locator(selectors[i], options))
@@ -240,23 +265,63 @@ export class Executor {
   }
 
   waitForURL (url, options) {
-    return this.page.waitForURL(url, options)
+    options = {
+      ignoreError: true,
+      timeout: Infinity,
+      ...options
+    }
+    return this.page.waitForURL(url, options).then(() => {
+      this._waitFailed = false
+    }).catch(err => {
+      this._waitFailed = true
+      if (!options.ignoreError) onError(err, this, 'waitForURL')
+    })
   }
 
   waitForEvent (event, optionsOrPredicate, options) {
-    return this.page.waitForEvent(event, optionsOrPredicate, options)
+    options = {
+      ignoreError: true,
+      timeout: Infinity,
+      ...options
+    }
+    return this.page.waitForEvent(event, optionsOrPredicate, options).then(() => {
+      this._waitFailed = false
+    }).catch(err => {
+      this._waitFailed = true
+      if (!options.ignoreError) onError(err, this, 'waitForEvent')
+    })
   }
 
   waitForFunction (func, args, options) {
+    options = {
+      ignoreError: true,
+      timeout: Infinity,
+      ...options
+    }
     if (typeof func === 'string') {
       func = `try { ${func} } catch { }`
     }
-    return this.page.waitForFunction(func, args, options)
+    return this.page.waitForFunction(func, args, options).then(() => {
+      this._waitFailed = false
+    }).catch(err => {
+      this._waitFailed = true
+      if (!options.ignoreError) onError(err, this, 'waitForFunction')
+    })
   }
 
   waitForLoadState (state, operations, options) {
+    options = {
+      ignoreError: true,
+      timeout: Infinity,
+      ...options
+    }
     const ps = [
-      this.page.waitForLoadState(state || 'domcontentloaded', options)
+      this.page.waitForLoadState(state || 'domcontentloaded', options).then(() => {
+        this._waitFailed = false
+      }).catch(err => {
+        this._waitFailed = true
+        if (!options.ignoreError) onError(err, this, 'waitForLoadState')
+      })
     ]
     if (Array.isArray(operations)) {
       ps.push(this.execute(operations, 'waitForLoadState', options))
@@ -326,7 +391,11 @@ export class Executor {
     return funcs.sleep(ms)
   }
 
-  locator (selector, options = {}) {
+  locator (selector, options) {
+    options = {
+      timeout: Infinity,
+      ...options
+    }
     const selectors = parseSelectors(selector)
     let loc
     for (const ele of selectors) {
@@ -473,27 +542,27 @@ export class Executor {
   }
 
   async accept (value, operations) {
-    this.page._dialog_ = { accept: true }
+    this.topPage._dialog_ = { accept: true }
     const [dialog] = await Promise.all([
       new Promise(resolve => {
-        this.page.once('dialog', resolve)
+        this.topPage.once('dialog', resolve)
       }),
       this.execute(operations, 'accept')
     ])
-    if (this.page._dialog_) {
+    if (this.topPage._dialog_) {
       return dialog.accept(value)
     }
   }
 
   async dismiss (operations) {
-    this.page._dialog_ = { dismiss: true }
+    this.topPage._dialog_ = { dismiss: true }
     const [dialog] = await Promise.all([
       new Promise(resolve => {
-        this.page.once('dialog', resolve)
+        this.topPage.once('dialog', resolve)
       }),
       this.execute(operations, 'dismiss')
     ])
-    if (this.page._dialog_) {
+    if (this.topPage._dialog_) {
       return dialog.dismiss()
     }
   }
@@ -733,7 +802,7 @@ export class Executor {
       timeout: Infinity,
       ...options
     }
-    this.page[options.once ? 'once' : 'on']('dialog', async dialog => {
+    this.topPage[options.once ? 'once' : 'on']('dialog', async dialog => {
       dialog._dismiss = dialog.dismiss
       dialog.dismiss = () => Promise.resolve()
       if (options.timeout !== Infinity) {
@@ -950,12 +1019,18 @@ export class Executor {
   }
 
   async fetch (urlOrList, options, transformer, ...props) {
+    options = {
+      limit: 10
+      ...options
+    }
     if (typeof urlOrList === 'function') {
       urlOrList = await urlOrList(this.safeThis)
     }
     const isArray = Array.isArray(urlOrList)
     urlOrList = isArray ? urlOrList : [[urlOrList, options]]
-    const list = await Promise.all(urlOrList.map(async (ele, index) => {
+
+    const list = await promises.schedule(async (i) => {
+      const ele = urlOrList[i]
       const url = ele[0]
       const op = { ...options, ...ele[1] }
       const { type = 'json' } = op
@@ -968,7 +1043,8 @@ export class Executor {
         data = await transformer(data, ele, index)
       }
       return data
-    }))
+    }, urlOrList.length, options.limit)
+
     const result = isArray ? list : list[0]
     if (props.length) {
       return this.save(result, ...props)
