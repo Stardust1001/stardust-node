@@ -241,10 +241,11 @@ export class Executor {
       timeout: 1e9,
       ...options
     }
-    const loc = this.locator(selector, options)
+    let loc = this.locator(selector, options)
     await loc.waitFor(options).then(() => {
       this._waitFailed = false
     }).catch(err => {
+      loc = null
       this._waitFailed = true
       if (!options.ignoreError) onError(err, this, 'waitFor')
     })
@@ -423,39 +424,39 @@ export class Executor {
   }
 
   async blur (selector, options = {}) {
-    return (await this.waitFor(selector, options)).blur(options)
+    return (await this.waitFor(selector, options))?.blur(options)
   }
 
   async box (selector, options = {}) {
-    return (await this.waitFor(selector, options)).boundingBox(options)
+    return (await this.waitFor(selector, options))?.boundingBox(options)
   }
 
   async checkFor (selector, options = {}) {
-    return (await this.waitFor(selector, options)).check(options)
+    return (await this.waitFor(selector, options))?.check(options)
   }
 
   async uncheckFor (selector, options = {}) {
-    return (await this.waitFor(selector, options)).uncheck(options)
+    return (await this.waitFor(selector, options))?.uncheck(options)
   }
 
   async clear (selector, options = {}) {
-    return (await this.waitFor(selector, options)).clear(options)
+    return (await this.waitFor(selector, options))?.clear(options)
   }
 
   async click (selector, options = {}) {
-    return (await this.waitFor(selector, options)).click(options)
+    return (await this.waitFor(selector, options))?.click(options)
   }
 
   async count (selector, options = {}) {
-    return (await this.waitFor(selector, options)).count(options)
+    return (await this.waitFor(selector, options))?.count(options)
   }
 
   async dblclick (selector, options = {}) {
-    return (await this.waitFor(selector, options)).dblclick(options)
+    return (await this.waitFor(selector, options))?.dblclick(options)
   }
 
   async dragTo (selector, targetSelector, options = {}) {
-    return (await this.waitFor(selector, options)).dragTo(this.locator(targetSelector), options)
+    return (await this.waitFor(selector, options))?.dragTo(this.locator(targetSelector), options)
   }
 
   eval (func, args = {}) {
@@ -466,15 +467,15 @@ export class Executor {
     if (typeof func === 'string') {
       func = eval('node => ' + func)
     }
-    return (await this.waitFor(selector, options)).evaluate(func, options)
+    return (await this.waitFor(selector, options))?.evaluate(func, options)
   }
 
   async evalOnAll (selector, func, options = {}) {
-    return (await this.waitFor(selector, options)).evaluateAll(func, options)
+    return (await this.waitFor(selector, options))?.evaluateAll(func, options)
   }
 
   async evaluateHandle (selector, func, args, options = {}) {
-    return (await this.waitFor(selector, options)).evaluateHandle(func, args, options)
+    return (await this.waitFor(selector, options))?.evaluateHandle(func, args, options)
   }
 
   async set (selector, attr, value, bySetter = false) {
@@ -493,19 +494,19 @@ export class Executor {
   }
 
   async fill (selector, value, options = {}) {
-    return (await this.waitFor(selector, options)).fill(value, options)
+    return (await this.waitFor(selector, options))?.fill(value, options)
   }
 
   async type (selector, value, options = {}) {
-    return (await this.waitFor(selector, options)).type(value, options)
+    return (await this.waitFor(selector, options))?.type(value, options)
   }
 
   async focus (selector, options = {}) {
-    return (await this.waitFor(selector, options)).focus(options)
+    return (await this.waitFor(selector, options))?.focus(options)
   }
 
   async hover (selector, options = {}) {
-    return (await this.waitFor(selector, options)).hover(options)
+    return (await this.waitFor(selector, options))?.hover(options)
   }
 
   async press (selector, keys, options = {}) {
@@ -515,6 +516,7 @@ export class Executor {
     }
     keys = Array.isArray(keys) ? keys : [keys]
     const loc = await this.waitFor(selector, options)
+    if (!loc) return
     for (let key of keys) {
       loc.press(key, options)
       await this.sleep(options.interval)
@@ -522,23 +524,23 @@ export class Executor {
   }
 
   async tap (selector, options = {}) {
-    return (await this.waitFor(selector, options)).tap(options)
+    return (await this.waitFor(selector, options))?.tap(options)
   }
 
   async select (selector, value, options = {}) {
-    return (await this.waitFor(selector, options)).selectOption(value, options)
+    return (await this.waitFor(selector, options))?.selectOption(value, options)
   }
 
   async check (selector, value, options = {}) {
-    return (await this.waitFor(selector, options)).setChecked(value, options)
+    return (await this.waitFor(selector, options))?.setChecked(value, options)
   }
 
   async upload (selector, value, options = {}) {
-    return (await this.waitFor(selector, options)).setInputFiles(value, options)
+    return (await this.waitFor(selector, options))?.setInputFiles(value, options)
   }
 
   async screenshot (selector, options = {}) {
-    return (await this.waitFor(selector, options)).screenshot(options)
+    return (await this.waitFor(selector, options))?.screenshot(options)
   }
 
   async accept (value, operations) {
@@ -604,27 +606,27 @@ export class Executor {
   }
 
   async view (selector, options = {}) {
-    return (await this.waitFor(selector, options)).scrollIntoViewIfNeeded(options)
+    return (await this.waitFor(selector, options))?.scrollIntoViewIfNeeded(options)
   }
 
   async attr (selector, name, options = {}) {
-    return (await this.waitFor(selector, options)).getAttribute(name, options)
+    return (await this.waitFor(selector, options))?.getAttribute(name, options)
   }
 
   async call (selector, method, options = {}) {
-    return (await this.waitFor(selector, options))[method](options)
+    return (await this.waitFor(selector, options))?.[method](options)
   }
 
   async html (selector, options = {}) {
-    return (await this.waitFor(selector, options)).innerHTML(options)
+    return (await this.waitFor(selector, options))?.innerHTML(options)
   }
 
   async text (selector, options = {}) {
-    return (await this.waitFor(selector, options)).innerText(options)
+    return (await this.waitFor(selector, options))?.innerText(options)
   }
 
   async content (selector, options) {
-    return (await this.waitFor(selector)).textContent(options)
+    return (await this.waitFor(selector))?.textContent(options)
   }
 
   async withFrame (selector, operations, options = {}) {
