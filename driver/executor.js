@@ -163,6 +163,12 @@ export class Executor {
     }, { operations, options })
   }
 
+  report (title, percent, options = {}, done = false) {
+    return this.ui(`[
+      ['report', '${title}', ${percent}, ${JSON.stringify(options)}, ${done}]
+    ]`)
+  }
+
   async new () {
     const page = await this.context.newPage()
     const executor = new this.config.Executor(this.driver, this.browser, this.context, {
@@ -351,7 +357,7 @@ export class Executor {
       document.querySelector(root || 'body').appendChild(button)
       button.style.cssText += \`
         z-index: 999999;
-        width: 300px;
+        width: auto;
         height: 30px;
         line-height: 30px;
         text-align: center;
@@ -360,6 +366,7 @@ export class Executor {
         font-size: 15px;
         cursor: pointer;
         margin: 2px;
+        padding: 0 10px;
       \`
       if (!root) {
         button.style.cssText += \`
