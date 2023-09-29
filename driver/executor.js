@@ -173,9 +173,9 @@ export class Executor {
     }, { operations, options })
   }
 
-  report (title, percent, options = {}, done = false) {
+  report (title, percent, options = {}, isDone = false) {
     return this.ui(`[
-      ['report', '${title}', ${percent}, ${JSON.stringify(options)}, ${done}]
+      ['report', '${title}', ${percent}, ${JSON.stringify(options)}, ${isDone}]
     ]`)
   }
 
