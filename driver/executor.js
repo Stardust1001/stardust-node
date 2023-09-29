@@ -1025,7 +1025,7 @@ export class Executor {
       mask.id = 'webot-mask'
       mask.style.cssText += \`
         ${this._maskStyle}
-        ${options.maskStyle}
+        ${options.maskStyle || ''}
       \`
       document.body.appendChild(mask)
       const iframe = document.createElement('iframe')
@@ -1046,7 +1046,7 @@ export class Executor {
         box-shadow: 10px 10px 20px 20px rgba(0, 0, 0, 0.2);
         pointer-events: auto;
         border-radius: 10px;
-        ${options.iframeStyle}
+        ${options.iframeStyle || ''}
       \`
       iframe.src = '${this.config.homeUrl}/blank/index.html'
       mask.appendChild(iframe)
