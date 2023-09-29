@@ -62,7 +62,7 @@ export class Executor {
       top: 0;
       background-color: rgba(0, 0, 0, 0.3);
       pointer-events: none;
-    ` + (options.maskStyle || '')
+    ` + (config.maskStyle || '')
     this.init()
   }
 
