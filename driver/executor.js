@@ -53,6 +53,16 @@ export class Executor {
     this._initialBot = this.config
     this._currentBot = this.config
     this._waitFailed = false
+    this._maskStyle = `
+      position: fixed;
+      z-index: 999998;
+      width: 100vw;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+    ` + (options.maskStyle || '')
     this.init()
   }
 
@@ -336,63 +346,10 @@ export class Executor {
     return Promise.all(ps)
   }
 
-  async waitForNext (title = '下一步', options) {
-    options = { ...options }
-    await this.eval(`
-      const mask = document.createElement('div')
-      mask.style.cssText += \`
-        position: fixed;
-        z-index: 999998;
-        width: 100vw;
-        height: 100vh;
-        left: 0;
-        top: 0;
-        background-color: rgba(0, 0, 0, 0.3);
-        pointer-events: none;
-        ${options.maskStyle}
-      \`
-      document.body.appendChild(mask)
-      const button = document.createElement('div')
-      const root = '${options.root || ''}'
-      document.querySelector(root || 'body').appendChild(button)
-      button.style.cssText += \`
-        z-index: 999999;
-        width: auto;
-        height: 30px;
-        line-height: 30px;
-        text-align: center;
-        background-color: #ff0040;
-        color: white;
-        font-size: 15px;
-        cursor: pointer;
-        margin: 2px;
-        padding: 0 10px;
-      \`
-      if (!root) {
-        button.style.cssText += \`
-          position: fixed;
-          right: 5px;
-          bottom: 5px;
-        \`
-      }
-      button.style.cssText += \`
-        ${options.style}
-      \`
-      button.onmouseover = () => {
-        button.style.opacity = 0.8
-      }
-      button.onmouseout = () => {
-        button.style.opacity = 1
-      }
-      button.textContent = \`${title}\`
-      new Promise(resolve => {
-        button.onclick = () => {
-          button.remove()
-          mask.remove()
-          resolve()
-        }
-      })
-    `)
+  async waitForNext (title = '下一步', options = {}) {
+    return this.ui(`[
+      ['waitForNext', '${title}', ${JSON.stringify(options)}]
+    ]`)
   }
 
   sleep (ms) {
@@ -1064,13 +1021,21 @@ export class Executor {
   async useFront (code, options, ...props) {
     options = { ...options }
     const name = await this.eval(`
+      const mask = document.createElement('div')
+      mask.id = 'webot-mask'
+      mask.style.cssText += \`
+        ${this._maskStyle}
+        ${options.maskStyle}
+      \`
+      document.body.appendChild(mask)
       const iframe = document.createElement('iframe')
       iframe.id = 'blank-' + Date.now().toString(16)
       iframe.name = iframe.id
       iframe.style.cssText += \`
         position: fixed;
-        left: 0;
-        top: 0;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
         width: 100%;
         height: 100%;
         display: block;
@@ -1078,10 +1043,14 @@ export class Executor {
         outline: 0;
         z-index: 999999;
         background-color: white;
-        ...${options.iframeCss}
+        box-shadow: 10px 10px 20px 20px rgba(0, 0, 0, 0.2);
+        pointer-events: auto;
+        border-radius: 10px;
+        ${options.iframeStyle}
       \`
       iframe.src = '${this.config.homeUrl}/blank/index.html'
-      document.body.appendChild(iframe)
+      mask.appendChild(iframe)
+      document.body.appendChild(mask)
       iframe.name
     `)
     await this.waitFor('#' + name)
@@ -1093,7 +1062,7 @@ export class Executor {
     }
     await frame.waitForLoadState()
     const result = await frame.evaluate(code)
-    this.eval(`$one('#${name}').remove()`)
+    this.eval(`$one('#${name}').parentNode.remove()`)
     if (props.length) {
       return this.save(result, ...props)
     }
