@@ -20,7 +20,13 @@ export class Loader {
   }
 
   static async excel (filepath, options = {}) {
-    let { sheetNames = ['Sheet1'], withHiddenRows = false, withHiddenCols = false, filterRow = true } = options
+    let {
+      sheetNames = ['Sheet1'],
+      withHiddenRows = false,
+      withHiddenCols = false,
+      filterRow = true,
+      fieldsDict = {}
+    } = options
     const workbook = new Excel.Workbook()
     await workbook.xlsx.readFile(filepath)
     if (sheetNames === '*') {
@@ -55,6 +61,17 @@ export class Loader {
             const dict = {}
             r.forEach((v, i) => dict[header[i]] = v)
             return dict
+          })
+          const headerDict = {}
+          for (let key in fieldsDict) {
+            headerDict[key] = header.find(f => fieldsDict[key].some(d => f === d))
+            headerDict[key] ||= header.find(f => fieldsDict[key].some(d => f.includes(d)))
+            if (!headerDict[key]) throw '表格里没找到 ' + fieldsDict[key].join('/') + ' 列'
+          }
+          data.forEach(row => {
+            for (let key in headerDict) {
+              row[key] = row[headerDict[key]]
+            }
           })
           return data
         }
