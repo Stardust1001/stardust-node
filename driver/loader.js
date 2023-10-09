@@ -62,10 +62,11 @@ export class Loader {
             r.forEach((v, i) => dict[header[i]] = v)
             return dict
           })
+          const fields = header.filter(k => k != undefined)
           const headerDict = {}
           for (let key in fieldsDict) {
-            headerDict[key] = header.find(f => fieldsDict[key].some(d => f === d))
-            headerDict[key] ||= header.find(f => fieldsDict[key].some(d => f.includes(d)))
+            headerDict[key] = fields.find(f => fieldsDict[key].some(d => f === d))
+            headerDict[key] ||= fields.find(f => fieldsDict[key].some(d => f.includes(d)))
             if (!headerDict[key]) throw '表格里没找到 ' + fieldsDict[key].join('/') + ' 列'
           }
           data.forEach(row => {

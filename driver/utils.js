@@ -37,9 +37,18 @@ export const onError = (err, executor, label = '') => {
   }
   log('[Error]: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -- ' + label)
   log(message)
-  executor.comment(message, {
-    backgroundColor: '#ce043d',
-    cssText: 'position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 999999; font-size: 20px;'
+  executor.report(message, '', {
+    style: `
+      background-color: red;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: 5px 0;
+    `,
+    titleStyle: `
+      font-size: 20px;
+      color: white;
+    `
   })
 }
 
