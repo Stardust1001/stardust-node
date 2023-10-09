@@ -62,7 +62,7 @@ export class Loader {
             r.forEach((v, i) => dict[header[i]] = v)
             return dict
           })
-          const fields = header.filter(k => k != undefined)
+          const fields = [...header].filter(k => k)
           const headerDict = {}
           for (let key in fieldsDict) {
             headerDict[key] = fields.find(f => fieldsDict[key].some(d => f === d))
