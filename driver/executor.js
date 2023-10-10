@@ -1061,8 +1061,10 @@ export class Executor {
       await funcs.sleep(20)
     }
     await frame.waitForLoadState()
-    const result = await frame.evaluate(code)
-    this.eval(`$one('#${name}').parentNode.remove()`)
+    const result = await frame.evaluate(code).then(result => {
+      this.eval(`$one('#${name}').parentNode.remove()`)
+      return result
+    }).catch(() => null)
     if (props.length) {
       return this.save(result, ...props)
     }
