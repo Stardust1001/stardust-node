@@ -10,7 +10,7 @@ import fsUtils from '../fsUtils.js'
 import Storage from '../storage.js'
 import Loader from './loader.js'
 import Dumper from './dumper.js'
-import { parseSelectors, chainLocator, onError } from './utils.js'
+import { parseSelectors, chainLocator, isUrlMatch, onError } from './utils.js'
 
 export class Executor {
   constructor (driver, browser, context, config = {}) {
@@ -1172,6 +1172,42 @@ export class Executor {
       return this.comment('断言失败: ' + message)
     }
     return funcs.sleep(Number.MAX_SAFE_INTEGER)
+  }
+
+  onRequest (urlPattern, handler, context = false) {
+    const route = this._interceptNetwork(context)
+    route.reqListeners.push([urlPattern, handler])
+  }
+
+  onResponse (urlPattern, handler, context = false) {
+    const route = this._interceptNetwork(context)
+    route.resListeners.push([urlPattern, handler])
+  }
+
+  _interceptNetwork (context = false) {
+    const host = context && this.context || this.page
+    if (host._route) return host._route
+    host._route = {
+      reqListeners: [],
+      resListeners: []
+    }
+    host.route('**/**', async (route, request) => {
+      const url = request.url()
+      let options = {}
+      for (let [pattern, handler] of host._route.reqListeners) {
+        if (isUrlMatch(url, pattern)) {
+          options = await handler(request)
+        }
+      }
+      const response = await route.fetch(options)
+      let result = {}
+      for (let [pattern, handler] of host._route.resListeners) {
+        if (isUrlMatch(url, pattern)) {
+          result = await handler(response)
+        }
+      }
+      return route.fulfill({ response, ...result })
+    })
   }
 
   async close () {

@@ -25,6 +25,12 @@ export const chainLocator = (locator, options) => {
   return locator
 }
 
+export const isUrlMatch = (url, pattern) => {
+  if (Array.isArray(pattern)) return pattern.some(p => isUrlMatch(url, p))
+  if (pattern instanceof RegExp) return pattern.test(url)
+  return pattern === url
+}
+
 export const onError = (err, executor, label = '') => {
   const log = executor.log || console.log
   let message
@@ -46,5 +52,6 @@ export const onError = (err, executor, label = '') => {
 export default {
   parseSelectors,
   chainLocator,
+  isUrlMatch,
   onError
 }
