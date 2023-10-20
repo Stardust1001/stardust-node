@@ -173,7 +173,7 @@ export class Executor {
     }, { operations, options })
   }
 
-  report (title, percent, options = {}, isDone = false) {
+  async report (title, percent, options = {}, isDone = false) {
     if (typeof title === 'function') {
       title = await title(this.safeThis)
     }
