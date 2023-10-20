@@ -174,6 +174,9 @@ export class Executor {
   }
 
   report (title, percent, options = {}, isDone = false) {
+    if (typeof title === 'function') {
+      title = await title(this.safeThis)
+    }
     return this.ui(`[
       ['report', '${title}', ${percent}, ${JSON.stringify(options)}, ${isDone}]
     ]`)
