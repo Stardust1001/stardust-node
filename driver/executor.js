@@ -1208,6 +1208,7 @@ export class Executor {
       }
       return route.fulfill({ response, ...result })
     })
+    return host._route
   }
 
   async close () {
