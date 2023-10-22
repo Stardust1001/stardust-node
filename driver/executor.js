@@ -807,6 +807,9 @@ export class Executor {
   }
 
   async save (data, saveTo, key, options) {
+    if (typeof options === 'function') {
+      options = await options(this.safeThis)
+    }
     options = { comment: true, ...options }
     if (typeof data === 'function') {
       data = await data(this.safeThis)
