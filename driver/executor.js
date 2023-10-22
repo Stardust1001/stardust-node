@@ -815,10 +815,12 @@ export class Executor {
       highdict.set(saveTo, key, data)
       return saveTo
     }
-    const dirname = path.join(this.config.tempDir, crypto.randomUUID())
-    await fsUtils.mkdir(dirname)
-    const name = saveTo
-    saveTo = path.join(dirname, path.basename(saveTo))
+    if (!path.isAbsolute(saveTo)) {
+      const dirname = options.dirname || path.join(this.config.tempDir, crypto.randomUUID())
+      await fsUtils.mkdir(dirname)
+      saveTo = path.join(dirname, path.basename(saveTo))
+    }
+    const name = path.basename(saveTo)
     const format = options.format || Loader.getFileType(saveTo)
     await Dumper[format](data, saveTo, options)
     if (options.comment) {
