@@ -335,17 +335,18 @@ export class Executor {
       timeout: 1e9,
       ...options
     }
-    const ps = [
-      this.page.waitForLoadState(state || 'domcontentloaded', options).then(() => {
-        this._waitFailed = false
-      }).catch(err => {
-        this._waitFailed = true
-        if (!options.ignoreError) onError(err, this, 'waitForLoadState')
-      })
-    ]
+    const ps = []
     if (Array.isArray(operations)) {
       ps.push(this.execute(operations, 'waitForLoadState', options))
     }
+    const p = this.page.waitForLoadState(state || 'domcontentloaded', options).then(() => {
+      this._waitFailed = false
+    }).catch(err => {
+      this._waitFailed = true
+      if (!options.ignoreError) onError(err, this, 'waitForLoadState')
+    })
+    ps.push(p)
+
     return Promise.all(ps)
   }
 
