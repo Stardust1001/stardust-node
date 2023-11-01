@@ -2,12 +2,13 @@ import os from 'os'
 import path from 'path'
 import child_process from 'child_process'
 
-export const curfile = (importMeta = import.meta) => {
-  return importMeta.url.slice(isWindows() ? 8 : 7)
+export const curfile = (importMeta) => {
+  const filepath = importMeta?.url || import.meta.url.split('node_modules')[0]
+  return filepath.slice(isWindows() ? 8 : 7)
 }
 
-export const curdir = (importMeta = import.meta) => {
-  return path.dirname(curfile(importMeta))
+export const curdir = (importMeta) => {
+  return importMeta ? path.dirname(curfile(importMeta)) : curfile()
 }
 
 export const isWindows = () => {

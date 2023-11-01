@@ -14,9 +14,8 @@ export class CommonService {
   }
 
   async init () {
-    const dirname = path.join(curdir(), '../../..')
-    this.uploadDir = path.join(dirname, this.config.uploadDir)
-    this.settingsPath = path.join(dirname, this.config.settingsPath)
+    this.uploadDir = path.join(curdir(), this.config.uploadDir)
+    this.settingsPath = path.join(curdir(), this.config.settingsPath)
 
     if (!(await fsUtils.exists(this.uploadDir))) {
       await fsUtils.mkdir(this.uploadDir)
