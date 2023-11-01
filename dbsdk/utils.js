@@ -8,7 +8,6 @@ export const makeModels = async (db) => {
   const dirname = curdir()
   const files = await glob(path.join(dirname, './models/*/init-models.js'))
   const initers = await Promise.all(files.map(async file => {
-    file = path.join(dirname, file)
     const res = await importFile(file)
     return {
       database: file.split(path.sep).slice(-2)[0],
