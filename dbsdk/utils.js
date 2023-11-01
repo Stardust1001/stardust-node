@@ -5,7 +5,8 @@ import { importFile } from '../funcs.js'
 import { curdir } from '../funcs.js'
 
 export const makeModels = async (db) => {
-  const files = await glob(path.join(curdir(), './models/*/init-models.js'))
+  const dirname = curdir()
+  const files = await glob(path.join(dirname, './models/*/init-models.js'))
   const initers = await Promise.all(files.map(async file => {
     file = path.join(dirname, file)
     const res = await importFile(file)
