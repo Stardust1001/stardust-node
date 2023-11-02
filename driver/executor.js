@@ -38,11 +38,13 @@ export class Executor {
       dates,
       fsUtils,
       nodeFuncs,
+      promises,
       ...nodeFuncs,
       ...funcs,
       ...highdict,
       ...dates,
       ...fsUtils,
+      ...promises,
       Loader,
       Dumper
     }
