@@ -10,7 +10,7 @@ const getCommand = (ctx) => {
   return ({
     GET: 'get',
     PUT: 'update',
-    DELETE: 'remove'
+    DELETE: 'destroy'
   })[ctx.request.method]
   || ctx.url.split('?')[0].split('/')[2]
 }
@@ -47,10 +47,10 @@ const getRequestAcl = (command, isFunc, funcName) => {
   ) {
     return 'update'
   } else if (
-    command === 'remove' ||
+    command === 'destroy' ||
     isFunc && 'destroy'.includes(funcName)
   ) {
-    return 'remove'
+    return 'destroy'
   }
 }
 

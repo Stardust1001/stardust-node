@@ -6,7 +6,7 @@ export class Acl {
       read = false,
       add = false,
       update = false,
-      remove = false
+      destroy = false
     } = perms || { }
     const {
       get = read,
@@ -23,7 +23,7 @@ export class Acl {
       updateById,
       updateBySearch,
       update,
-      remove
+      destroy
     }
     this.options = {
       idField: 'id',
@@ -68,8 +68,8 @@ export class Acl {
     return this.updateBySearch(...props)
   }
 
-  remove (...props) {
-    return this.check(...props) || this.perms.remove || this.removeBySelf(...props)
+  destroy (...props) {
+    return this.check(...props) || this.perms.destroy || this.destroyBySelf(...props)
   }
 
   byWhere (...props) {
@@ -89,8 +89,8 @@ export class Acl {
         this.updateByWhere(...props)
         break
       }
-      case 'remove': {
-        this.removeByWhere(...props)
+      case 'destroy': {
+        this.destroyByWhere(...props)
         break
       }
     }
@@ -169,11 +169,11 @@ export class Acl {
     return true
   }
 
-  removeByWhere (...props) {
+  destroyByWhere (...props) {
     const { command, funcName, meta, form } = props[2]
     const where = props[props.length - 1]
 
-    if (command === 'remove') {
+    if (command === 'destroy') {
       this.setWhere(meta, {
         ...where,
         [this.options.idField]: meta.id
@@ -202,8 +202,8 @@ export class Acl {
     }) || false
   }
 
-  removeBySelf (...props) {
-    return props[0] && this.removeByWhere(...props, {
+  destroyBySelf (...props) {
+    return props[0] && this.destroyByWhere(...props, {
       [this.options.creatorField]: props[0].id
     }) || false
   }
@@ -319,8 +319,8 @@ export class ModelAcl extends Acl {
     return this.check('updateBySearch', ...props)
   }
 
-  remove (...props) {
-    return this.check('remove', ...props)
+  destroy (...props) {
+    return this.check('destroy', ...props)
   }
 
   check (key, ...props) {
@@ -416,7 +416,7 @@ export const defaultModelAcl = new ModelAcl({
   add: [],
   updateById: [],
   updateBySearch: [],
-  remove: []
+  destroy: []
 }, {})
 
 export default {

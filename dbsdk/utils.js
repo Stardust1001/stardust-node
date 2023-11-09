@@ -100,7 +100,7 @@ export const makeBatchCtx = (operation, ctx) => {
       method: ({
         get: 'GET',
         update: 'PUT',
-        remove: 'DELETE'
+        destroy: 'DELETE'
       })[type] || 'POST',
       body: data,
       decodedToken: ctx.request.decodedToken,
@@ -115,7 +115,7 @@ export const makeBatchCtx = (operation, ctx) => {
       }
     }
   }
-  if (['get', 'update', 'remove'].includes(type)) {
+  if (['get', 'update', 'destroy'].includes(type)) {
     mockCtx.url = '/this.service'
   } else {
     mockCtx.url = '/this.service/' + type

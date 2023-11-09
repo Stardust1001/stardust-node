@@ -66,7 +66,7 @@ export class RestfulService {
     return this.db.models[model].update(form, { where }, options)
   }
 
-  async remove (model, where, options) {
+  async destroy (model, where, options) {
     return this.db.models[model].destroy({ where }, options)
   }
 

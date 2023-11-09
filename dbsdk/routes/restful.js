@@ -15,7 +15,7 @@ export class RestfulRoute {
     router.post('/restful/add', this.add.bind(this))
     router.post('/restful/search', this.search.bind(this))
     router.put('/restful', this.update.bind(this))
-    router.delete('/restful', this.remove.bind(this))
+    router.delete('/restful', this.destroy.bind(this))
     router.post('/restful/func', this.func.bind(this))
     router.post('/restful/batch', this.batch.bind(this))
   }
@@ -63,12 +63,12 @@ export class RestfulRoute {
     }
   }
 
-  async remove (ctx) {
+  async destroy (ctx) {
     const { id, where, model, table, options } = ctx.request.meta
     await hooks.beforeRemove(ctx.request.meta, ctx)
     await this.app.config.hooks.beforeRemove?.(ctx.request.meta, ctx)
     ctx.body = {
-      data: await this.restful.remove(model, where || { [table.primaryKeyField]: id }, options),
+      data: await this.restful.destroy(model, where || { [table.primaryKeyField]: id }, options),
       err: null
     }
   }
@@ -89,7 +89,7 @@ export class RestfulRoute {
   }
 
   async batch (ctx) {
-    const funcs = ['get', 'add', 'search', 'update', 'remove', 'func']
+    const funcs = ['get', 'add', 'search', 'update', 'destroy', 'func']
     const routeFuncs = {}
     funcs.forEach(k => routeFuncs[k] = this[k])
 
