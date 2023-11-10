@@ -1182,14 +1182,14 @@ export class Executor {
     return funcs.sleep(Number.MAX_SAFE_INTEGER)
   }
 
-  onRequest (urlPattern, handler, context = false) {
+  onRequest (urlPattern, handler, once = false, context = false) {
     const route = this._interceptNetwork(context)
-    route.reqListeners.push([urlPattern, handler])
+    route.reqListeners.push([urlPattern, handler, once])
   }
 
-  onResponse (urlPattern, handler, context = false) {
+  onResponse (urlPattern, handler, once = false, context = false) {
     const route = this._interceptNetwork(context)
-    route.resListeners.push([urlPattern, handler])
+    route.resListeners.push([urlPattern, handler, once])
   }
 
   _interceptNetwork (context = false) {
@@ -1202,18 +1202,24 @@ export class Executor {
     host.route('**/**', async (route, request) => {
       const url = request.url()
       let options = {}
-      for (let [pattern, handler] of host._route.reqListeners) {
+      for (let listener of host._route.reqListeners) {
+        const [pattern, handler, once] = listener
         if (isUrlMatch(url, pattern)) {
           options = await handler(request, this.safeThis)
+          if (once) listener.done = true
         }
       }
+      host._route.reqListeners = host._route.reqListeners.filter(l => !l.done)
       const response = await route.fetch(options)
       let result = {}
-      for (let [pattern, handler] of host._route.resListeners) {
+      for (let listener of host._route.resListeners) {
+        const [pattern, handler, once] = listener
         if (isUrlMatch(url, pattern)) {
           result = await handler(response, this.safeThis)
+          if (once) listener.done = true
         }
       }
+      host._route.resListeners = host._route.resListeners.filter(l => !l.done)
       return route.fulfill({ response, ...result })
     })
     return host._route
