@@ -1204,14 +1204,14 @@ export class Executor {
       let options = {}
       for (let [pattern, handler] of host._route.reqListeners) {
         if (isUrlMatch(url, pattern)) {
-          options = await handler(request)
+          options = await handler(request, this.safeThis)
         }
       }
       const response = await route.fetch(options)
       let result = {}
       for (let [pattern, handler] of host._route.resListeners) {
         if (isUrlMatch(url, pattern)) {
-          result = await handler(response)
+          result = await handler(response, this.safeThis)
         }
       }
       return route.fulfill({ response, ...result })
