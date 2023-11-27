@@ -1,12 +1,13 @@
 import path from 'path'
-import { glob } from 'glob'
 import Sequelize from 'sequelize'
 import { importFile } from '../funcs.js'
 import { curdir } from '../funcs.js'
+import { listAll } from '../fsUtils.js'
 
 export const makeModels = async (db) => {
   const dirname = curdir()
-  const files = await glob(path.join(dirname, './models/*/init-models.js'))
+  let files = await listAll(path.join(dirname, 'models'))
+  files = files.filter(f => f.includes('init-models.js'))
   const initers = await Promise.all(files.map(async file => {
     const res = await importFile(file)
     return {
