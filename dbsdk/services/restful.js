@@ -44,6 +44,9 @@ export class RestfulService {
     }
     if (include) {
       props.include = translateInclude(include, table)
+      if (withCount) {
+        props.distinct = true
+      }
     }
 
     const result = await table[withCount ? 'findAndCountAll' : 'findAll'](props, options)
