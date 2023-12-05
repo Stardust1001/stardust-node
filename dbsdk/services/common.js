@@ -48,6 +48,25 @@ export class CommonService {
   async updateSettings (settings) {
     await fsUtils.write(this.settingsPath, JSON.stringify(settings, null, 4))
   }
+
+  async getTables () {
+    const datasources = {}
+    for (let name in this.db.sources) {
+      const db = this.db.sources[name]
+      const tables = {}
+      for (let key in db.models) {
+        tables[key] = Object.entries(db.models[key].rawAttributes).filter(([prop, field]) => {
+          return field.type.toString() !== 'VIRTUAL'
+        }).map(([prop, field]) => {
+          const item = { name: prop, label: field.comment }
+          if (field.primaryKey) item.primaryKey = true
+          return item
+        })
+      }
+      datasources[name] = tables
+    }
+    return datasources
+  }
 }
 
 export default CommonService
