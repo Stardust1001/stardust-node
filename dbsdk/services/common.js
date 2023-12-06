@@ -50,20 +50,21 @@ export class CommonService {
   }
 
   async getSchemas () {
-    const datasources = {}
+    const datasources = []
     for (let name in this.db.sources) {
-      const db = this.db.sources[name]
-      const tables = {}
-      for (let key in db.models) {
-        tables[key] = Object.entries(db.models[key].rawAttributes).filter(([prop, field]) => {
+      const source = this.db.sources[name]
+      const tables = []
+      for (let key in source.models) {
+        const fields = Object.entries(source.models[key].rawAttributes).filter(([prop, field]) => {
           return field.type.toString() !== 'VIRTUAL'
         }).map(([prop, field]) => {
           const item = { name: prop, label: field.comment }
           if (field.primaryKey) item.primaryKey = true
           return item
         })
+        tables.push({ name: key, label: source.models[key].options.label, fields })
       }
-      datasources[name] = tables
+      datasources.push({ name, tables, label: source.label })
     }
     return datasources
   }
