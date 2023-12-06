@@ -49,7 +49,7 @@ export class CommonService {
     await fsUtils.write(this.settingsPath, JSON.stringify(settings, null, 4))
   }
 
-  async getTables () {
+  async getSchemas () {
     const datasources = {}
     for (let name in this.db.sources) {
       const db = this.db.sources[name]

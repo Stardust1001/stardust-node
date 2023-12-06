@@ -13,7 +13,7 @@ export class CommonRoute {
     router.get('/common/get_settings', this.getSettings.bind(this))
     router.post('/common/update_settings', this.updateSettings.bind(this))
     router.post('/common/call_sql', this.callSql.bind(this))
-    router.get('/common/get_tables', this.getTables.bind(this))
+    router.get('/common/get_schemas', this.getSchemas.bind(this))
   }
 
   async uploadFiles (ctx, next) {
@@ -81,8 +81,8 @@ export class CommonRoute {
     ctx.body = { data: result, err: null }
   }
 
-  async getTables (ctx, next) {
-    const result = await this.common.getTables()
+  async getSchemas (ctx, next) {
+    const result = await this.common.getSchemas()
     ctx.body = { data: result, err: null }
   }
 }
