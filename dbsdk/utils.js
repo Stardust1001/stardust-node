@@ -60,12 +60,13 @@ export const connect = (config, source) => {
 const registerModels = async (db, config) => {
   const { datasources } = config
   datasources.forEach(ele => {
-    const { main, alias, database, label } = ele
+    const { main, alias, database, label, fields } = ele
     const sequelize = connect(config, ele)
     const source = {
       main,
       sequelize,
       label,
+      fields,
       models: {}
     }
     db.sources[database] = source
