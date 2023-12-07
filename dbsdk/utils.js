@@ -129,29 +129,10 @@ export const makeBatchCtx = (operation, ctx) => {
   return mockCtx
 }
 
-export const checkModelAcls = (app) => {
-  const { sources } = app.db
-  const { modelConfigs } = app.config
-  const databases = Object.keys(sources)
-  for (let database of databases) {
-    if (!modelConfigs[database]) {
-      console.log(`💢💢💢💢💢 数据库 ${database} 未配置权限，此数据库将默认只读`)
-    } else {
-      const tables = Object.keys(sources[database].models)
-      for (let table of tables) {
-        if (!modelConfigs[database][table] || !modelConfigs[database][table].acl) {
-          console.log(`💢💢💢💢💢 数据表 ${database}.${table} 未配置权限，此数据表将默认只读`)
-        }
-      }
-    }
-  }
-}
-
 export default {
   makeModels,
   connect,
   registerModels,
   calcModel,
-  makeBatchCtx,
-  checkModelAcls
+  makeBatchCtx
 }

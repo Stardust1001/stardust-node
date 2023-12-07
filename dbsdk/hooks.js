@@ -12,8 +12,7 @@ const fieldsAlias = {
 const deleteAliasFields = (meta, ctx) => {
   const idField = meta.table.primaryKeyField
   const { database, modelName, form } = meta
-  const modelConfig = ctx.app.config.modelConfigs[database][modelName]
-  const fields = { ...fieldsAlias, ...(modelConfig.fields || {}) }
+  const fields = { ...fieldsAlias }
   delete form[idField]
   delete form[fields.creatorField]
   delete form[fields.updaterField]
