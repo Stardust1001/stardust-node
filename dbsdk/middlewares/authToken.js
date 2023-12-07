@@ -26,6 +26,9 @@ export const authToken = async (ctx, next) => {
       }
     ]
   }
+  if (decoded) {
+    ctx.request.acl = ctx.app.cache.getKey('user-' + decoded.id)
+  }
   const { roles, iat, exp, id, username } = ctx.request.decodedToken
   ctx.request.decodedToken.roleNames = roles.map(role => role.name)
   await next()
