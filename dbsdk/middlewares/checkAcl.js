@@ -129,9 +129,9 @@ const filterFields = (ctx, acl, ...props) => {
   })
   readFields = [...new Set(readFields)]
   writeFields = [...new Set(writeFields)]
-  const { reqAcl, form, command, funcName, meta } = props[2]
+  let { reqAcl, form, command, funcName, meta } = props[2]
   if (reqAcl === 'update') {
-    const form = command === 'update' ? form : form[1]
+    form = command === 'update' ? form : form[1]
     for (let key in form) {
       if (!writeFields.includes(key)) {
         delete form[key]
@@ -143,6 +143,36 @@ const filterFields = (ctx, acl, ...props) => {
       attributes = meta.attributes || {}
       meta.attributes = attributes
     } else if (command === 'search') {
+      const filters = []
+      acl.roles.forEach(role => {
+        role.acl.forEach(acl => {
+          if (acl.table === props[1]) {
+            filters.push(...acl.filters)
+          }
+        })
+      })
+      if (filters.length) {
+        form.where ||= {}
+        form.where['[Op.and]'] ||= []
+        form.where['[Op.and]'].push(...filters.map(f => {
+          const [field, relation, meta] = f
+          switch (relation) {
+            case 'if': {
+              return { [meta]: true }
+            }
+            case 'eq':
+            case 'ne':
+            case 'in':
+            case 'notIn': {
+              return {
+                [field]: {
+                  [`[Op.${relation}]`]: acl.meta[meta]
+                }
+              }
+            }
+          }
+        }))
+      }
       attributes = meta.form.attributes || {}
       meta.form.attributes = attributes
     } else if (!!funcName) {
