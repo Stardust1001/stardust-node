@@ -157,13 +157,11 @@ const filterFields = (ctx, acl, ...props) => {
         form.where['[Op.and]'].push(...filters.map(f => {
           const [field, relation, meta] = f
           switch (relation) {
-            case 'if': {
-              return { [meta]: true }
+            case 'if':
+            case 'ifNot': {
+              return { [meta]: relation === 'if' }
             }
-            case 'eq':
-            case 'ne':
-            case 'in':
-            case 'notIn': {
+            default: {
               return {
                 [field]: {
                   [`[Op.${relation}]`]: acl.meta[meta]
