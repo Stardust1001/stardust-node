@@ -70,6 +70,7 @@ export const checkAcl = async (ctx, next) => {
 
   if (!reqAcl) {
     ctx.body = noop
+    ctx.app.config.hooks.onAclDenied?.(ctx, '不支持的操作方式')
     return
   }
 
@@ -90,6 +91,7 @@ export const checkAcl = async (ctx, next) => {
 
   if (!hasPerm) {
     ctx.body = noop
+    ctx.app.config.hooks.onAclDenied?.(ctx, '无权操作此表')
     return
   }
 
@@ -109,6 +111,7 @@ export const checkAcl = async (ctx, next) => {
         ...noop,
         err: noop.err + '(无权查看任何字段)'
       }
+      ctx.app.config.hooks.onAclDenied?.(ctx, '无权查看任何字段')
       return
     }
   }
