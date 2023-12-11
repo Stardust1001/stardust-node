@@ -31,6 +31,7 @@ export const makeModels = async (db) => {
       }
       if (source.main) {
         models[name] = model
+        model.idField = Object.values(model.rawAttributes).find(e => e.primaryKey).fieldName
       }
     })
   })

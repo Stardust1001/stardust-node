@@ -101,7 +101,7 @@ export const checkAcl = async (ctx, next) => {
   if (noLimitFields) {
     return next()
   }
-  filterFields(ctx, acl, ...props)
+  filterAcls(ctx, acl, ...props)
   if (meta.attributes) {
     const isNoneAttributes = Array.isArray(meta.attributes) && meta.attributes.length === 0
     if (isNoneAttributes) {
@@ -116,7 +116,7 @@ export const checkAcl = async (ctx, next) => {
   return next()
 }
 
-const filterFields = (ctx, acl, ...props) => {
+const filterAcls = (ctx, acl, ...props) => {
   let readFields = []
   let writeFields = []
   acl.roles.forEach(role => {
@@ -130,6 +130,7 @@ const filterFields = (ctx, acl, ...props) => {
   readFields = [...new Set(readFields)]
   writeFields = [...new Set(writeFields)]
   let { reqAcl, form, command, funcName, meta } = props[2]
+  const none = { [ctx.app.db.models[props[1]].idField]: { '[Op.is]': null } }
   if (reqAcl === 'update') {
     form = command === 'update' ? form : form[1]
     for (let key in form) {
@@ -155,21 +156,29 @@ const filterFields = (ctx, acl, ...props) => {
         form.where ||= {}
         form.where['[Op.and]'] ||= []
         form.where['[Op.and]'].push(...filters.map(f => {
-          const [field, relation, meta] = f
+          const [field, relation, userMeta] = f
           switch (relation) {
-            case 'if':
+            case 'if': {
+              return (acl.meta[userMeta]) ? null : none
+            }
             case 'ifNot': {
-              return { [meta]: relation === 'if' }
+              return (!acl.meta[userMeta]) ? null : none
+            }
+            case 'isNull': {
+              return (acl.meta[userMeta] == null) ? null : none
+            }
+            case 'notNull': {
+              return (acl.meta[userMeta] !== null) ? null : none
             }
             default: {
               return {
                 [field]: {
-                  [`[Op.${relation}]`]: acl.meta[meta]
+                  [`[Op.${relation}]`]: acl.meta[userMeta]
                 }
               }
             }
           }
-        }))
+        }).filter(f => f))
       }
       attributes = meta.form.attributes || {}
       meta.form.attributes = attributes
