@@ -1,3 +1,5 @@
+import maskings from './maskings.js'
+
 const noop = {
   code: 10002,
   data: null,
@@ -103,7 +105,7 @@ export const checkAcl = async (ctx, next) => {
   if (noLimitFields) {
     return next()
   }
-  filterAcls(ctx, acl, ...props)
+  const { maskingList } = filterAcls(ctx, acl, ...props)
   if (meta.attributes) {
     const isNoneAttributes = Array.isArray(meta.attributes) && meta.attributes.length === 0
     if (isNoneAttributes) {
@@ -116,17 +118,39 @@ export const checkAcl = async (ctx, next) => {
     }
   }
 
-  return next()
+  await next()
+  const dict = {}
+  const fieldsList = []
+  const allFields = []
+  maskingList.forEach(ele => {
+    if (!ele) return fieldsList.push([])
+    fieldsList.push(ele.map(e => {
+      if (!allFields.includes(e[0])) allFields.push(e[0])
+      dict[e[0]] = e[1]
+      return e[0]
+    }))
+  })
+  const maskingFields = allFields.filter(f => fieldsList.every(l => l.includes(f)))
+  if (maskingFields.length) {
+    ctx.body.data.forEach(ele => {
+      maskingFields.forEach(field => {
+        const method = dict[field]
+        ele.dataValues[field] = maskings[method](ele[field])
+      })
+    })
+  }
 }
 
 const filterAcls = (ctx, acl, ...props) => {
   let readFields = []
   let writeFields = []
+  const maskingList = []
   acl.roles.forEach(role => {
     role.acl.forEach(acl => {
       if (acl.table === props[1]) {
         readFields.push(...acl.fields.read)
         writeFields.push(...acl.fields.write)
+        maskingList.push(acl.fields.maskings)
       }
     })
   })
@@ -201,6 +225,7 @@ const filterAcls = (ctx, acl, ...props) => {
     }
     meta.attributes = attributes
   }
+  return { maskingList }
 }
 
 export default checkAcl
