@@ -464,7 +464,7 @@ export class Executor {
   }
 
   async fill (selector, value, options = {}) {
-    return (await this.waitFor(selector, options))?.fill(value, options)
+    return (await this.waitFor(selector, options))?.fill(value.toString(), options)
   }
 
   async type (selector, value, options = {}) {
