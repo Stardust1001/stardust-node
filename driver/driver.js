@@ -38,7 +38,10 @@ export class Driver {
       onError(err, this.log, 'driver beforeInit')
     }
     await this.userCache.load()
-    this.indicators.num_runs = this.userCache.cache.num_runs || 0
+    this.userCache.cache.num_runs = Object.values(this.userCache.cache.runs || {}).reduce((sum, org) => {
+      return sum + Object.values(org).reduce((num, e) => num + e, 0)
+    }, 0)
+    this.indicators.num_runs = this.userCache.cache.num_runs
     try {
       await this.afterInit?.()
     } catch (err) {
