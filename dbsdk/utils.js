@@ -1,40 +1,39 @@
 import path from 'path'
+import crypto from 'crypto'
 import Sequelize from 'sequelize'
 import { importFile } from '../funcs.js'
 import { curdir } from '../funcs.js'
-import { listAll } from '../fsUtils.js'
+import { exists, copy, remove, listAll } from '../fsUtils.js'
 
 export const makeModels = async (db) => {
   const dirname = curdir()
-  let files = await listAll(path.join(dirname, 'models'))
-  files = files.filter(f => f.includes('init-models.js'))
-  const initers = await Promise.all(files.map(async file => {
-    const res = await importFile(file)
-    return {
-      database: file.split(path.sep).slice(-2)[0],
-      initFunc: res.default
-    }
-  }))
-
   const models = {}
-  initers.forEach(initer => {
-    const { database, initFunc } = initer
-    const source = db.sources[database]
-    if (!source) return
-    const databaseModels = initFunc(source.sequelize)
+  await Promise.all(Object.values(db.sources).map(async source => {
+    const { main, cluster, alias, database, sequelize, model } = source
+    const dir = path.join(dirname, 'models', cluster || database)
+    if (!(await exists(dir))) return
+    const temp = path.join(dirname, 'models', crypto.randomUUID())
+    await copy(dir, temp)
+    const files = await listAll(temp)
+    const initerFile = files.find(f => f.includes('init-models.js'))
+    if (!initerFile) return
+    const initFunc = (await importFile(initerFile)).default
+    const databaseModels = initFunc(sequelize)
     Object.values(databaseModels).forEach(model => {
       const name = model.tableName
-      source.models[name] = model
+      model.database = database
+      models[name] = model
       models[`${database}.${name}`] = model
-      if (source.alias) {
-        models[`${source.alias}.${name}`] = model
+      if (alias) {
+        models[`${alias}.${name}`] = model
       }
-      if (source.main) {
+      if (main) {
         models[name] = model
         model.idField = Object.values(model.rawAttributes).find(e => e.primaryKey).fieldName
       }
     })
-  })
+    await remove(temp)
+  }))
   return models
 }
 
@@ -61,13 +60,16 @@ export const connect = (config, source) => {
 const registerModels = async (db, config) => {
   const { datasources } = config
   datasources.forEach(ele => {
-    const { main, alias, database, label, fields } = ele
+    const { main, cluster, alias, database, label, fields } = ele
     const sequelize = connect(config, ele)
     const source = {
       main,
-      sequelize,
+      cluster,
+      alias,
+      database,
       label,
       fields,
+      sequelize,
       models: {}
     }
     db.sources[database] = source
