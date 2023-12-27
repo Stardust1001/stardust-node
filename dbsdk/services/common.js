@@ -53,6 +53,7 @@ export class CommonService {
     const datasources = []
     for (let name in this.db.sources) {
       const source = this.db.sources[name]
+      if (source.cluster && source.cluster !== source.database) continue
       const readonly = source.fields?.readonly
       const tables = []
       for (let key in source.models) {

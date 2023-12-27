@@ -22,7 +22,7 @@ export const makeModels = async (db) => {
     Object.values(databaseModels).forEach(model => {
       const name = model.tableName
       model.database = database
-      models[name] = model
+      source.models[name] = model
       models[`${database}.${name}`] = model
       if (alias) {
         models[`${alias}.${name}`] = model
