@@ -1,3 +1,4 @@
+import { translateInclude } from '../translate.js'
 import { calcModel } from '../utils.js'
 
 export const validateRestful = async (ctx, next) => {
@@ -12,13 +13,34 @@ export const validateRestful = async (ctx, next) => {
       err = '缺少参数: id'
     } else {
       const { database, modelName } = calcModel(model, models)
+      const table = models[model]
+      const form = ctx.request.body
+      const options = {}
       ctx.request.meta = {
         database,
         model,
         modelName,
         id,
-        table: models[model],
-        form: ctx.request.body
+        table,
+        form,
+        options
+      }
+      if (form.$options) {
+        Object.assign(options, form.$options)
+        delete form.$options
+      }
+      if (Array.isArray(options.include)) {
+        options.include = translateInclude(options.include, table)
+        if (options.include.length) {
+          const related = {}
+          options.include.forEach(ele => {
+            if (form[ele.as]) {
+              related[ele.as] = form[ele.as]
+              delete form[ele.as]
+            }
+          })
+          options.related = related
+        }
       }
     }
   }

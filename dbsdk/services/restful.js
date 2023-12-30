@@ -11,6 +11,7 @@ export class RestfulService {
   }
 
   async add (model, form, options) {
+    options.related && Object.assign(form, options.related)
     return this.db.models[model].create(form, options)
   }
 
