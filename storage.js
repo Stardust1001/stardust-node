@@ -1,3 +1,4 @@
+import { funcs } from '@stardust-js/js'
 import { read, write } from './fsUtils.js'
 
 class Storage {
@@ -23,14 +24,14 @@ class Storage {
   }
 
   async save (cache) {
-    if (cache == null) {
-      if (!this.loaded) {
-        return
-      }
-      cache = this.cache
+    if (!this.loaded) throw new Error('please load first')
+    this.cache = cache || this.cache
+    if (this._isSaving) {
+      return funcs.sleep(1000).then(() => this.save(this.cache))
     }
-    this.cache = cache
+    this._isSaving = true
     await write(this.filepath, JSON.stringify(this.cache, null, this.jsonSpace))
+    this._isSaving = false
   }
 
   getItem (key) {
