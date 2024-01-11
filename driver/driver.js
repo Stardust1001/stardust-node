@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 import { chromium, firefox, webkit } from 'playwright'
 import { funcs, highdict } from '@stardust-js/js'
 import Storage from '../storage.js'

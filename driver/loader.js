@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 import Papa from 'papaparse'
 import Excel from 'exceljs'
 import mammoth from 'mammoth'

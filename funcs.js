@@ -1,6 +1,6 @@
-import os from 'os'
-import path from 'path'
-import child_process from 'child_process'
+import os from 'node:os'
+import path from 'node:path'
+import child_process from 'node:child_process'
 
 export const curfile = (importMeta) => {
   const filepath = importMeta?.url || import.meta.url.split('node_modules')[0]

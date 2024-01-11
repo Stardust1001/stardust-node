@@ -1,6 +1,6 @@
-import fs from 'fs'
+import fs from 'node:fs'
+import path from 'node:path'
 import fsExtra from 'fs-extra'
-import path from 'path'
 
 export const exists = filepath => {
   return new Promise(resolve => fs.exists(filepath, resolve))

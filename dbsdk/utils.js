@@ -1,5 +1,5 @@
-import path from 'path'
-import crypto from 'crypto'
+import path from 'node:path'
+import crypto from 'node:crypto'
 import Sequelize from 'sequelize'
 import { importFile } from '../funcs.js'
 import { curdir } from '../funcs.js'
