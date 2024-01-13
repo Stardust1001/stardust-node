@@ -3,6 +3,7 @@ import path from 'node:path'
 import crypto from 'node:crypto'
 import Papa from 'papaparse'
 import Excel from 'exceljs'
+import mammoth from 'mammoth'
 import randomUa from 'random-useragent'
 import { funcs, highdict, dates, promises } from '@stardust-js/js'
 import nodeFuncs from '../funcs.js'
@@ -30,6 +31,7 @@ export class Executor {
       crypto,
       Papa,
       Excel,
+      mammoth,
       randomUa
     }
     this.utils = {
