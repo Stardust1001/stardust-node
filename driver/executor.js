@@ -1222,6 +1222,7 @@ export class Executor {
           if (once) listener.done = true
         }
       }
+      result ||= {}
       host._route.resListeners = host._route.resListeners.filter(l => !l.done)
       if (!result.body) result.body = await response.body()
       if (!result.headers) result.headers = response.headers()
