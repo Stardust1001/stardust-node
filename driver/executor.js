@@ -858,17 +858,14 @@ export class Executor {
   async pickList (optionsOrFunc, ...props) {
     let list = []
     if (typeof optionsOrFunc === 'object') {
-      const { each, saveTo } = optionsOrFunc
       const fields = optionsOrFunc.fields.map(ele => {
-        if (typeof ele === 'object') {
-          return ele
-        }
+        if (typeof ele === 'object') return ele
         const [prop, selector, type] = ele.split('::')
         return { prop, selector, type }
       })
       list = await this.eval(`
         const fields = JSON.parse('${JSON.stringify(fields)}')
-        $all('${each}').map(n => {
+        $all('${optionsOrFunc.each}').map(n => {
           const item = {}
           fields.forEach(field => {
             const value = n.$one(field.selector)?._text()
