@@ -1208,11 +1208,12 @@ export class Executor {
           if (once) listener.done = true
         }
       }
+      options ||= {}
       host._route.reqListeners = host._route.reqListeners.filter(l => !l.done)
-      if (!options.headers) options.headers = request.headers()
-      if (!options.method) options.method = request.method()
-      if (!options.postData) options.postData = request.postData()
-      if (!options.url) options.url = url
+      options.headers ||= request.headers()
+      options.method ||= request.method()
+      options.postData ||= request.postData()
+      options.url ||= url
       const response = await route.fetch(options)
       let result = {}
       for (let listener of host._route.resListeners) {
@@ -1224,8 +1225,8 @@ export class Executor {
       }
       result ||= {}
       host._route.resListeners = host._route.resListeners.filter(l => !l.done)
-      if (!result.body) result.body = await response.body()
-      if (!result.headers) result.headers = response.headers()
+      result.body ||= await response.body()
+      result.headers ||= response.headers()
       return route.fulfill({ response, ...result })
     })
     return host._route
