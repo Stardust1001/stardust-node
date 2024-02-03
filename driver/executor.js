@@ -186,6 +186,15 @@ export class Executor {
     ]`)
   }
 
+  async reportTable (options = {}) {
+    if (typeof options === 'function') {
+      options = await options(this.safeThis)
+    }
+    return this.ui(`[
+      ['reportTable', ${JSON.stringify(options)}]
+    ]`)
+  }
+
   async new () {
     const page = await this.context.newPage()
     const executor = new this.config.Executor(this.driver, this.browser, this.context, {
