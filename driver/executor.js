@@ -537,6 +537,13 @@ export class Executor {
     }
   }
 
+  async filechoose (file, operations) {
+    const chooserPromise = this.page.waitForEvent('filechooser')
+    await this.execute(operations, 'filechoose')
+    const chooser = await chooserPromise
+    await chooser.setFiles(file)
+  }
+
   async dismiss (operations) {
     this.topPage._dialog_ = { dismiss: true }
     const [dialog] = await Promise.all([
