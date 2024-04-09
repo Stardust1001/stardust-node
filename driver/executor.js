@@ -987,7 +987,7 @@ export class Executor {
     this.log(message, options)
   }
 
-  log (message, options, ...props) {
+  async log (message, options, ...props) {
     options = { ...options }
     if (typeof message === 'function') {
       message = await message(this.safeThis, ...props)
