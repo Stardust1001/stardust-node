@@ -900,10 +900,7 @@ export class Executor {
   }
 
   title (title, options) {
-    options = {
-      resetable: false,
-      ...options
-    }
+    options = { resetable: false, ...options }
     return this.eval(`
       document.title = '${title}'
       if (!${options.resetable}) {
@@ -990,11 +987,19 @@ export class Executor {
     this.log(message, options)
   }
 
+  log (message, options, ...props) {
+    options = { ...options }
+    if (typeof message === 'function') {
+      message = await message(this.safeThis, ...props)
+    }
+    this.log(message, options)
+  }
+
   async load (filepath, options, ...props) {
+    options = { ...options }
     if (typeof filepath === 'function') {
       filepath = await filepath(this.safeThis)
     }
-    options = { ...options }
     if (!await fsUtils.exists(filepath)) {
       throw '文件不存在: ' + filepath
     }
@@ -1011,10 +1016,7 @@ export class Executor {
   }
 
   async fetch (urlOrList, options, transformer, ...props) {
-    options = {
-      limit: 10,
-      ...options
-    }
+    options = { limit: 10, ...options }
     if (typeof urlOrList === 'function') {
       urlOrList = await urlOrList(this.safeThis)
     }
