@@ -73,10 +73,14 @@ export class Driver {
     }, null, 2) + '\n' + botCode
     const cache = this.userCache.cache
     meta.params.forEach(p => {
-      botCode = botCode.replaceAll('#' + p.prop + '#', props[p.prop] || highdict.get(cache, p.prop))
+      let value = props[p.prop] || highdict.get(cache, p.prop)
+      if (value && typeof value === 'object') value = JSON.stringify(value)
+      botCode = botCode.replaceAll('#' + p.prop + '#', value)
     })
     meta.props.forEach(p => {
-      botCode = botCode.replaceAll('#' + p.prop + '#', props[p.prop])
+      let value = props[p.prop]
+      if (value && typeof value === 'object') value = JSON.stringify(value)
+      botCode = botCode.replaceAll('#' + p.prop + '#', value)
     })
     return botCode + '\nreturn operations\n'
   }
