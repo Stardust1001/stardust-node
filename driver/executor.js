@@ -182,7 +182,7 @@ export class Executor {
       title = await title(this.safeThis)
     }
     return this.ui(`[
-      ['report', '${title}', ${percent}, ${JSON.stringify(options)}, ${isDone}]
+      ['report', \`${title}\`, ${percent}, ${JSON.stringify(options)}, ${isDone}]
     ]`)
   }
 
@@ -365,7 +365,7 @@ export class Executor {
 
   async waitForNext (title = '下一步', options = {}) {
     return this.ui(`[
-      ['waitForNext', '${title}', ${JSON.stringify(options)}]
+      ['waitForNext', \`${title}\`, ${JSON.stringify(options)}]
     ]`)
   }
 
@@ -464,12 +464,12 @@ export class Executor {
       value = await this.eval(value)
     }
     return this.eval(`
-      const node = $one('${selector}')
+      const node = $one(\`${selector}\`)
       const value = eval(\`${value}\`)
       if (${bySetter}) {
-        node.setAttribute('${attr}', value)
+        node.setAttribute(\`${attr}\`, value)
       } else {
-        node['${attr}'] = value
+        node[\`${attr}\`] = value
       }
     `)
   }
@@ -809,14 +809,14 @@ export class Executor {
       placeholder: '请输入验证码',
       ...options
     }
-    const text = await this.eval(`window.prompt('${options.placeholder}')`, options)
+    const text = await this.eval(`window.prompt(\`${options.placeholder}\`)`, options)
     await this.fill(selector, text, options)
   }
 
   async fillOcr (selector, imgSelector, options) {
     const { ocrCaptchaUrl } = this.config
     if (ocrCaptchaUrl) {
-      const base64 = await this.eval(`webot.funcs.img2Base64('${imgSelector}')`, options)
+      const base64 = await this.eval(`webot.funcs.img2Base64(\`${imgSelector}\`)`, options)
       const data = await fetch(ocrCaptchaUrl, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -880,8 +880,8 @@ export class Executor {
         return { prop, selector, type }
       })
       list = await this.eval(`
-        const fields = JSON.parse('${JSON.stringify(fields)}')
-        $all('${optionsOrFunc.each}').map(n => {
+        const fields = ${JSON.stringify(fields)}
+        $all(\`${optionsOrFunc.each}\`).map(n => {
           const item = {}
           fields.forEach(field => {
             const value = n.$one(field.selector)?._text()
@@ -902,10 +902,10 @@ export class Executor {
   title (title, options) {
     options = { resetable: false, ...options }
     return this.eval(`
-      document.title = '${title}'
+      document.title = \`${title}\`
       if (!${options.resetable}) {
         Object.defineProperty(document, 'title', {
-          get: () => '${title}',
+          get: () => \`${title}\`,
           set: () => true
         })
       }
@@ -928,7 +928,7 @@ export class Executor {
         }
         if (!await page.evaluate('!!window.shikiHighlighter')) {
           await page.evaluate(`
-            shiki.setCDN('${this.config.homeUrl}/lib/shiki');
+            shiki.setCDN(\`${this.config.homeUrl}/lib/shiki\`);
             new Promise(async resolve => {
               window.shikiHighlighter = await shiki.getHighlighter({
                 theme: 'material-theme-palenight',
@@ -1076,7 +1076,7 @@ export class Executor {
         border-radius: 10px;
         ${options.iframeStyle || ''}
       \`
-      iframe.src = '${this.config.homeUrl}/blank/index.html'
+      iframe.src = \`${this.config.homeUrl}/blank/index.html\`
       mask.appendChild(iframe)
       document.body.appendChild(mask)
       iframe.name
@@ -1090,7 +1090,7 @@ export class Executor {
     }
     await frame.waitForLoadState()
     const result = await frame.evaluate(code).then(result => {
-      this.eval(`$one('#${name}').parentNode.remove()`)
+      this.eval(`$one(\`#${name}\`).parentNode.remove()`)
       return result
     }).catch(() => null)
     if (props.length) {
@@ -1117,8 +1117,8 @@ export class Executor {
           \`,
           data () {
             return {
-              options: JSON.parse('${JSON.stringify(options)}'),
-              action: '${this.config.apiUrl}/upload',
+              options: ${JSON.stringify(options)},
+              action: \`${this.config.apiUrl}/upload\`,
               files: []
             }
           },
@@ -1141,8 +1141,8 @@ export class Executor {
   async useForm (fields, options, ...props) {
     options = { ...options }
     return this.useFront(`
-      const fields = JSON.parse('${JSON.stringify(fields)}')
-      const options = JSON.parse('${JSON.stringify(options)}')
+      const fields = ${JSON.stringify(fields)}
+      const options = ${JSON.stringify(options)}
       const { CrudController, baseForm, initForm } = StardustUI
       class Controller extends CrudController {
 
