@@ -267,10 +267,10 @@ export class Executor {
   }
 
   async waitFor (selector, options = {}) {
+    options.state ??= 'visible'
+    options.timeout ??= 1e9
     options = {
       ignoreError: true,
-      state: 'visible',
-      timeout: 1e9,
       ...options
     }
     let loc = this.locator(selector, options)
