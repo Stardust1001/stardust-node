@@ -67,6 +67,7 @@ export class Executor {
       background-color: rgba(0, 0, 0, 0.3);
       pointer-events: none;
     ` + (config.maskStyle || '')
+    this._autogui = null
     this.init()
   }
 
@@ -825,6 +826,45 @@ export class Executor {
       return this.fill(selector, data.text, options)
     }
     return this.prompt(selector, options)
+  }
+
+  async autogui (operations, options = {}) {
+    const autoguiUrl = options.autoguiUrl ?? this.config.autoguiUrl
+    if (!autoguiUrl) throw '没有配置桌面自动化服务的网址'
+    this._autogui ||= {
+      baseURL: autoguiUrl,
+      async fetch (url, options = {}) {
+        options.headers ||= {}
+        options.headers['content-type'] = 'application/json'
+        if (options.params) {
+          url += funcs.encodeQuery(options.params)
+        }
+        if (options.body) {
+          options.method ??= 'POST'
+          if (typeof options.body !== 'string') {
+            options.body = JSON.stringify(options.body)
+          }
+        }
+        options.method ??= 'GET'
+        const res = await fetch(autoguiUrl + url, options)
+        return res.json()
+      },
+      async execute (operations) {
+        const data = await this.fetch('/execute', { body: { operations } })
+        return data.data
+      },
+      async find_window (class_name, window_name) {
+        const data = await this.fetch('/find_window', { body: { class_name, window_name } })
+        return data.data
+      },
+      async get_window_rect (handle) {
+        const data = await this.fetch('/get_window_rect', { body: { handle } })
+        return data.data
+      }
+    }
+    if (operations.length) {
+      return this._autogui.execute(operations)
+    }
   }
 
   async save (data, saveTo, key, options) {
