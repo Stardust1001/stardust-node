@@ -1384,6 +1384,7 @@ export class Executor {
     } catch (err) {
       onError(err, this, 'afterClose')
     }
+    this.emitter.emit('closed')
   }
 }
 
