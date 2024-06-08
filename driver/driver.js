@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { chromium, firefox, webkit } from 'playwright'
-import { funcs, highdict } from '@stardust-js/js'
+import { funcs, highdict, eventemitter } from '@stardust-js/js'
 import Storage from '../storage.js'
 import Executor from './executor.js'
 import { onError } from './utils.js'
@@ -16,6 +16,7 @@ export class Driver {
     this.headlessContext = null
     this.executors = []
     this.log = config.log || console.log
+    this.emitter = new eventemitter.EventEmitter()
 
     this.userCache = new Storage({
       filepath: path.join(config.userCacheFile),
@@ -92,13 +93,18 @@ export class Driver {
       onError(err, this.log, 'beforeExec')
     }
     if (!operations.length) return
-    options = {
+    const defaultOptions = {
       newBrowser: false,
       newContext: false,
       log: this.log,
       Executor: this.Executor,
-      ...this.config,
-      ...options
+      emitter: this.emitter,
+      ...this.config
+    }
+    for (let key in defaultOptions) {
+      if (options[key] === undefined) {
+        options[key] = defaultOptions[key]
+      }
     }
     if (options.newBrowser) options.newContext = true
     const [browser, context] = await this.getContext(options)

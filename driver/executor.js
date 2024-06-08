@@ -22,6 +22,7 @@ export class Executor {
     this.executors = []
     this.page = config.page
     this.topPage = config.topPage
+    this.emitter = this.config.emitter
     this.cache = null
     this.log = config.log || console.log
 
@@ -72,6 +73,11 @@ export class Executor {
   }
 
   async init () {
+    this.isPlaying = true
+    this.emitter.on('pause', () => {
+      this.isPlaying = false
+      this.emitter.emit('pause')
+    })
     try {
       await this.beforeInit?.()
     } catch (err) {
@@ -121,6 +127,12 @@ export class Executor {
     })
   }
 
+  async _waitContinue () {
+    await new Promise(resolve => {
+      this.emitter.once('play', resolve)
+    })
+  }
+
   async execute (operations, source, ...props) {
     try {
       await this.beforeExecute?.(operations, source, ...props)
@@ -136,6 +148,9 @@ export class Executor {
     ]
     const lastState = { ...this._state }
     for (let i = 0, len = operations.length; i < len; i++) {
+      if (!this.isPlaying) {
+        await this._waitContinue()
+      }
       const ele = operations[i]
       Object.assign(this._state, {
         lastIndex: i - 1,
@@ -197,12 +212,11 @@ export class Executor {
   }
 
   async new () {
-    const page = await this.context.newPage()
-    const executor = new this.config.Executor(this.driver, this.browser, this.context, {
-      ...this.config,
-      page,
-      topPage: this.topPage
-    })
+    const newPage = await this.context.newPage()
+    const { page, topPage } = this.config
+    Object.assign(this.config, { page: newPage, topPage: this.topPage })
+    const executor = new this.config.Executor(this.driver, this.browser, this.context, this.config)
+    Object.assign(this.config, { page, topPage })
     this.executors.push(executor)
     return executor
   }
@@ -629,11 +643,10 @@ export class Executor {
       if (frame) break
       await funcs.sleep(options.interval)
     }
-    const executor = new this.config.Executor(this.driver, this.browser, this.context, {
-      ...this.config,
-      page: frame,
-      topPage: this.topPage
-    })
+    const { page, topPage } = this.config
+    Object.assign(this.config, { page: frame, topPage: this.topPage })
+    const executor = new this.config.Executor(this.driver, this.browser, this.context, this.config)
+    Object.assign(this.config, { page, topPage })
     executor._initialBot = this._initialBot
     await frame.waitForLoadState()
     return executor.execute(operations, 'withFrame')
