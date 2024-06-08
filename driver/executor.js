@@ -139,7 +139,11 @@ export class Executor {
       this.isPlaying = false
       this.emitter.emit('paused')
     })
-    this.page?.once('close', this.onPageClose)
+    this._onPageClose = () => {
+      if (this.isNewed) return
+      this.emitter.emit('closed')
+    }
+    this.page?.once('close', this._onPageClose)
     try {
       await this.beforeInit?.()
     } catch (err) {
@@ -286,7 +290,7 @@ export class Executor {
     url ||= this.config.homeUrl + '/blank/index.html'
     if (!this.page) {
       this.page = await this.context.newPage()
-      this.page.once('close', this.onPageClose)
+      this.page.once('close', this._onPageClose)
       try {
         await this.afterNewPage?.(this.page, url, options)
       } catch (err) {
@@ -638,10 +642,10 @@ export class Executor {
       this.context.waitForEvent('page', options),
       this.execute(operations, 'follow')
     ])
-    this.page.off('close', this.onPageClose)
+    this.page.off('close', this._onPageClose)
     this.page.close()
     this.page = page
-    this.page.once('close', this.onPageClose)
+    this.page.once('close', this._onPageClose)
     await this.waitForLoadState()
   }
 
@@ -1390,11 +1394,6 @@ export class Executor {
         resolve()
       })
     })
-  }
-
-  onPageClose () {
-    if (this.isNewed) return
-    this.emitter.emit('closed')
   }
 }
 
