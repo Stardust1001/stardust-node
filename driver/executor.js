@@ -18,6 +18,7 @@ const COMMANDS_DICT = {
   callBot: '调用脚本',
   execute: '批量执行命令',
   ui: '批量执行命令(前端)',
+  progress: '进度',
   report: '汇报',
   reportTable: '汇报表格',
   new: '创建新执行器',
@@ -256,6 +257,8 @@ export class Executor {
       return new StardustBrowser.UIExecutor(options).execute(operations, options)
     }, { operations, options })
   }
+
+  async progress (title, percent) { }
 
   async report (title, percent, options = {}, isDone = false) {
     if (typeof title === 'function') {
