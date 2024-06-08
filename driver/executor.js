@@ -13,6 +13,66 @@ import Loader from './loader.js'
 import Dumper from './dumper.js'
 import { parseSelectors, chainLocator, isUrlMatch, onError } from './utils.js'
 
+const COMMANDS_DICT = {
+  use: '使用脚本',
+  callBot: '调用脚本',
+  execute: '批量执行命令',
+  ui: '批量执行命令(前端)',
+  report: '汇报',
+  reportTable: '汇报表格',
+  new: '创建新执行器',
+  goto: '打开网址',
+  reload: '刷新网页',
+  waitFor: '等待元素',
+  waitOr: '等待任意一个元素',
+  waitForURL: '等待网址',
+  waitForFunction: '等待条件成立',
+  waitForLoadState: '等待网页刷新',
+  waitForNext: '等待下一步',
+  sleep: '等待',
+  blur: '鼠标移出',
+  clear: '清空',
+  click: '点击',
+  dblclick: '双击',
+  dragTo: '拖拽',
+  eval: '执行代码(eval)',
+  fill: '填写输入框',
+  focus: '元素聚焦',
+  hover: '鼠标悬浮',
+  press: '按键',
+  select: '下拉框选择',
+  upload: '上传文件',
+  screenshot: '截图',
+  accept: '确定弹框',
+  filechoose: '文件选择',
+  dismiss: '取消弹框',
+  follow: '跟随跳转',
+  jump: '跳转',
+  mouse: '鼠标',
+  keyboard: '按键',
+  enter: '回车',
+  withFrame: '进入iframe',
+  if: '如果(if)',
+  elseIf: '另外(elseIf)',
+  else: '否则(else)',
+  switch: '条件判断',
+  for: '循环(指定次数)',
+  while: '循环(当)',
+  dynamic: '动态执行',
+  func: '执行代码(func)',
+  prompt: '提示输入',
+  fillOcr: 'OCR识别填写',
+  autogui: '执行电脑自动化',
+  save: '保存文件',
+  pick: '选取内容',
+  title: '修改标签页名称',
+  comment: '注释',
+  load: '加载文件',
+  useFront: '自定义网页内容',
+  useForm: '表单',
+  close: '关闭网页'
+}
+
 export class Executor {
   constructor (driver, browser, context, config = {}) {
     this.driver = driver
@@ -152,7 +212,10 @@ export class Executor {
         await this._waitContinue()
       }
       const ele = operations[i]
-      this.emitter.emit('progress', { index: i, operation: ele })
+      this.emitter.emit('progress', {
+        index: i, operation: ele,
+        type: COMMANDS_DICT[ele[0]] || '其他操作'
+      })
       Object.assign(this._state, {
         lastIndex: i - 1,
         currentIndex: i,
