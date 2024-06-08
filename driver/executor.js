@@ -82,6 +82,7 @@ export class Executor {
     this.executors = []
     this.page = config.page
     this.topPage = config.topPage
+    this.isNewed = config.isNewed
     this.emitter = this.config.emitter
     this.cache = null
     this.log = config.log || console.log
@@ -138,6 +139,7 @@ export class Executor {
       this.isPlaying = false
       this.emitter.emit('paused')
     })
+    this.page?.once('close', this.onPageClose)
     try {
       await this.beforeInit?.()
     } catch (err) {
@@ -183,16 +185,6 @@ export class Executor {
         org,
         name,
         ...options
-      })
-    })
-  }
-
-  async _waitContinue () {
-    await new Promise(resolve => {
-      this.emitter.once('play', () => {
-        this.isPlaying = true
-        this.emitter.emit('played')
-        resolve()
       })
     })
   }
@@ -282,9 +274,9 @@ export class Executor {
   async new () {
     const newPage = await this.context.newPage()
     const { page, topPage } = this.config
-    Object.assign(this.config, { page: newPage, topPage: this.topPage })
+    Object.assign(this.config, { page: newPage, topPage: this.topPage, isNewed: true })
     const executor = new this.config.Executor(this.driver, this.browser, this.context, this.config)
-    Object.assign(this.config, { page, topPage })
+    Object.assign(this.config, { page, topPage, isNewed: false })
     this.executors.push(executor)
     return executor
   }
@@ -294,6 +286,7 @@ export class Executor {
     url ||= this.config.homeUrl + '/blank/index.html'
     if (!this.page) {
       this.page = await this.context.newPage()
+      this.page.once('close', this.onPageClose)
       try {
         await this.afterNewPage?.(this.page, url, options)
       } catch (err) {
@@ -645,8 +638,10 @@ export class Executor {
       this.context.waitForEvent('page', options),
       this.execute(operations, 'follow')
     ])
+    this.page.off('close', this.onPageClose)
     this.page.close()
     this.page = page
+    this.page.once('close', this.onPageClose)
     await this.waitForLoadState()
   }
 
@@ -1384,6 +1379,21 @@ export class Executor {
     } catch (err) {
       onError(err, this, 'afterClose')
     }
+    this.emitter.emit('closed')
+  }
+
+  async _waitContinue () {
+    await new Promise(resolve => {
+      this.emitter.once('play', () => {
+        this.isPlaying = true
+        this.emitter.emit('played')
+        resolve()
+      })
+    })
+  }
+
+  onPageClose () {
+    if (this.isNewed) return
     this.emitter.emit('closed')
   }
 }
