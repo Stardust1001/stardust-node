@@ -152,6 +152,7 @@ export class Executor {
         await this._waitContinue()
       }
       const ele = operations[i]
+      this.emitter.emit('progress', { index: i, operation: ele })
       Object.assign(this._state, {
         lastIndex: i - 1,
         currentIndex: i,
