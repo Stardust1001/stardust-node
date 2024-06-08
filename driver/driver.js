@@ -120,6 +120,7 @@ export class Driver {
     executor.isExcuting = true
     await executor.execute(operations, 'exec')
     executor.isExcuting = false
+    options.emitter.emit('done')
     this.indicators.num_bots --
 
     await this.clearExecutor(executor, options)
