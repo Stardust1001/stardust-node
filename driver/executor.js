@@ -136,7 +136,7 @@ export class Executor {
     this.isPlaying = true
     this.emitter.on('pause', () => {
       this.isPlaying = false
-      this.emitter.emit('pause')
+      this.emitter.emit('paused')
     })
     try {
       await this.beforeInit?.()
@@ -189,7 +189,11 @@ export class Executor {
 
   async _waitContinue () {
     await new Promise(resolve => {
-      this.emitter.once('play', resolve)
+      this.emitter.once('play', () => {
+        this.isPlaying = true
+        this.emitter.emit('played')
+        resolve()
+      })
     })
   }
 
