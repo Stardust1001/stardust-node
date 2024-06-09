@@ -82,7 +82,7 @@ export class Executor {
     this.config = config
     this.executors = []
     this.page = config.page
-    this.topPage = config.topPage
+    this.topPage = config.topPage || config.page
     this.isNewed = config.isNewed
     this.emitter = this.config.emitter
     this.cache = null
@@ -305,7 +305,7 @@ export class Executor {
         onError(err, this, 'afterNewPage')
       }
     }
-    this.topPage = this.topPage || this.page
+    if (!this.topPage || this.topPage.isClosed()) this.topPage = this.page
     try {
       await this.beforeGoto?.(url, options)
     } catch (err) {
@@ -651,8 +651,9 @@ export class Executor {
       this.execute(operations, 'follow')
     ])
     this.page.off('close', this._onPageClose)
-    this.page.close()
+    await this.page.close()
     this.page = page
+    if (!this.topPage || this.topPage.isClosed()) this.topPage = this.page
     this.page.once('close', this._onPageClose)
     await this.waitForLoadState()
   }
