@@ -140,6 +140,11 @@ export class Executor {
       this.isPlaying = false
       this.emitter.emit('paused')
     })
+    this.emitter.on('hover', () => {
+      if (this.topPage && !this.topPage.isClosed()) {
+        this.topPage.bringToFront()
+      }
+    })
     this._onPageClose = () => {
       if (this.isNewed) return
       this.emitter.emit('closed')
