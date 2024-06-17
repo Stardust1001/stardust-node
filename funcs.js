@@ -26,7 +26,7 @@ export const pipeRes = (res, ctx, options) => {
   }
   const headers = {}
   Array.from(res.headers.entries()).forEach(([k, v]) => headers[k] = v)
-  if (!options.compress) {
+  if (options.compress) {
     delete headers['content-encoding']
   }
   delete headers['content-length']
