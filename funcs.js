@@ -24,11 +24,13 @@ export const pipeRes = (res, ctx, options) => {
     compress: false,
     ...options
   }
+  const headers = {}
+  Array.from(res.headers.entries()).map(([k, v]) => headers[k] = v)
   if (options.compress) {
-    res.headers.delete('content-encoding')
+    delete headers['content-encoding']
   }
-  res.headers.delete('content-length')
-  ctx.res.writeHead(res.status, res.headers)
+  delete headers['content-length']
+  ctx.res.writeHead(res.status, headers)
   res.body.pipe(ctx.res)
   return new Promise((resolve) => {
     res.body.on('end', resolve)
